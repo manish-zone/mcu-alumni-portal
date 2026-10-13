@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { campusMemories } from '../data/mockData';
@@ -6,6 +6,8 @@ import {
   Image as ImageIcon,
   X,
   ZoomIn,
+  ZoomOut,
+  RotateCcw,
   ExternalLink,
   ChevronLeft,
   ChevronRight,
@@ -141,6 +143,103 @@ export const CampusGallery = ({
 
   const activePhoto = activePhotoIndex !== null ? filteredMemories[activePhotoIndex] : null;
 
+  // Zoom & Pan state for Lightbox Modal
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const hasMovedRef = useRef(false);
+
+  // Reset zoom & pan when active photo changes
+  useEffect(() => {
+    setZoomScale(1);
+    setPanPosition({ x: 0, y: 0 });
+    setIsDragging(false);
+  }, [activePhotoIndex]);
+
+  const handleZoomIn = (e) => {
+    if (e) e.stopPropagation();
+    setZoomScale((prev) => Math.min(3, +(prev + 0.5).toFixed(1)));
+  };
+
+  const handleZoomOut = (e) => {
+    if (e) e.stopPropagation();
+    setZoomScale((prev) => {
+      const next = Math.max(1, +(prev - 0.5).toFixed(1));
+      if (next === 1) setPanPosition({ x: 0, y: 0 });
+      return next;
+    });
+  };
+
+  const handleZoomReset = (e) => {
+    if (e) e.stopPropagation();
+    setZoomScale(1);
+    setPanPosition({ x: 0, y: 0 });
+    setIsDragging(false);
+  };
+
+  const handleToggleZoom = (e) => {
+    if (e) e.stopPropagation();
+    if (zoomScale === 1) {
+      setZoomScale(2);
+    } else {
+      setZoomScale(1);
+      setPanPosition({ x: 0, y: 0 });
+      setIsDragging(false);
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    if (zoomScale <= 1) return;
+    e.preventDefault();
+    hasMovedRef.current = false;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || zoomScale <= 1) return;
+    e.preventDefault();
+    hasMovedRef.current = true;
+    setPanPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e) => {
+    if (zoomScale <= 1 || e.touches.length !== 1) return;
+    hasMovedRef.current = false;
+    setIsDragging(true);
+    setDragStart({
+      x: e.touches[0].clientX - panPosition.x,
+      y: e.touches[0].clientY - panPosition.y,
+    });
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging || zoomScale <= 1 || e.touches.length !== 1) return;
+    hasMovedRef.current = true;
+    setPanPosition({
+      x: e.touches[0].clientX - dragStart.x,
+      y: e.touches[0].clientY - dragStart.y,
+    });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleImageClick = (e) => {
+    e.stopPropagation();
+    if (hasMovedRef.current) return;
+    handleToggleZoom(e);
+  };
+
   // Keyboard navigation for Lightbox
   useEffect(() => {
     if (activePhotoIndex === null) return;
@@ -152,6 +251,18 @@ export const CampusGallery = ({
         setActivePhotoIndex((prev) => (prev + 1) % filteredMemories.length);
       } else if (e.key === 'ArrowLeft') {
         setActivePhotoIndex((prev) => (prev - 1 + filteredMemories.length) % filteredMemories.length);
+      } else if (e.key === '+' || e.key === '=') {
+        setZoomScale((prev) => Math.min(3, +(prev + 0.5).toFixed(1)));
+      } else if (e.key === '-' || e.key === '_') {
+        setZoomScale((prev) => {
+          const next = Math.max(1, +(prev - 0.5).toFixed(1));
+          if (next === 1) setPanPosition({ x: 0, y: 0 });
+          return next;
+        });
+      } else if (e.key === '0') {
+        setZoomScale(1);
+        setPanPosition({ x: 0, y: 0 });
+        setIsDragging(false);
       }
     };
 
@@ -504,20 +615,29 @@ export const CampusGallery = ({
 
       </div>
 
-      {/* Lightbox Modal with Fullscreen & Prev/Next Keyboard Nav (Portaled to document.body so it always opens in current viewport) */}
+      {/* Lightbox Modal with Fullscreen, Zoom Controls & Prev/Next Nav */}
       {activePhoto &&
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-fadeIn"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-fadeIn"
             onClick={() => setActivePhotoIndex(null)}
           >
             <div
-              className="bg-white max-w-4xl w-full rounded-3xl overflow-hidden border-2 border-[#003366] shadow-2xl relative flex flex-col max-h-[92vh]"
+              className="bg-white max-w-5xl xl:max-w-6xl w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-300 shadow-2xl relative flex flex-col max-h-[96vh]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Image / Video Header */}
-              <div className="relative aspect-[16/10] max-h-[60vh] bg-slate-950 flex items-center justify-center overflow-hidden">
+              <div
+                className="relative flex-1 min-h-[50vh] max-h-[74vh] sm:max-h-[78vh] bg-slate-950 flex items-center justify-center overflow-hidden select-none"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
                 {isVideoUrlOrData(activePhoto) ? (
                   <video
                     key={activePhoto.id}
@@ -529,16 +649,27 @@ export const CampusGallery = ({
                     className="w-full h-full object-contain bg-black"
                   />
                 ) : (
-                  <img
-                    src={activePhoto.image}
-                    alt={activePhoto.title}
-                    onError={(e) => {
-                      if (activePhoto.fallbackUrl && e.target.src !== activePhoto.fallbackUrl) {
-                        e.target.src = activePhoto.fallbackUrl;
-                      }
-                    }}
-                    className="w-full h-full object-contain"
-                  />
+                  <div
+                    className="w-full h-full flex items-center justify-center overflow-hidden cursor-default"
+                    onClick={handleImageClick}
+                  >
+                    <img
+                      src={activePhoto.image}
+                      alt={activePhoto.title}
+                      onError={(e) => {
+                        if (activePhoto.fallbackUrl && e.target.src !== activePhoto.fallbackUrl) {
+                          e.target.src = activePhoto.fallbackUrl;
+                        }
+                      }}
+                      draggable={false}
+                      style={{
+                        transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomScale})`,
+                        transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                        cursor: zoomScale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
+                      }}
+                      className="max-w-full max-h-full w-auto h-auto object-contain select-none"
+                    />
+                  </div>
                 )}
 
                 {/* Prev / Next Buttons */}
@@ -547,7 +678,7 @@ export const CampusGallery = ({
                     e.stopPropagation();
                     setActivePhotoIndex((prev) => (prev - 1 + filteredMemories.length) % filteredMemories.length);
                   }}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-900/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-slate-900/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
                   title="Previous (Left Arrow)"
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -558,14 +689,65 @@ export const CampusGallery = ({
                     e.stopPropagation();
                     setActivePhotoIndex((prev) => (prev + 1) % filteredMemories.length);
                   }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-900/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-slate-900/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
                   title="Next (Right Arrow)"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
 
+                {/* Floating Zoom Controls Bar (Over Image) */}
+                {!isVideoUrlOrData(activePhoto) && (
+                  <div
+                    className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 sm:gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-950/85 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 shadow-xl transition-all"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={handleZoomOut}
+                      disabled={zoomScale <= 1}
+                      className="p-1 sm:p-1.5 rounded-full hover:bg-white/20 active:scale-90 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
+                      title="Zoom Out (-) / ज़ूम घटाएं"
+                      aria-label="Zoom Out"
+                    >
+                      <ZoomOut className="w-4 h-4 text-white" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleZoomReset}
+                      className="px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-mono font-bold hover:bg-white/20 active:scale-95 transition-all text-amber-300 cursor-pointer"
+                      title="Reset Zoom (100%) / सामान्य आकार"
+                    >
+                      {Math.round(zoomScale * 100)}%
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleZoomIn}
+                      disabled={zoomScale >= 3}
+                      className="p-1 sm:p-1.5 rounded-full hover:bg-white/20 active:scale-90 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
+                      title="Zoom In (+) / ज़ूम बढ़ाएं"
+                      aria-label="Zoom In"
+                    >
+                      <ZoomIn className="w-4 h-4 text-white" />
+                    </button>
+
+                    {zoomScale > 1 && (
+                      <button
+                        type="button"
+                        onClick={handleZoomReset}
+                        className="p-1 sm:p-1.5 rounded-full hover:bg-white/20 active:scale-90 text-amber-300 transition-all cursor-pointer border-l border-white/20 pl-1.5 sm:pl-2 ml-0.5"
+                        title="Reset Zoom (1x)"
+                        aria-label="Reset Zoom"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 {/* Top Right Close & Admin Delete */}
-                <div className="absolute top-4 right-4 flex items-center gap-2">
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex items-center gap-1.5 sm:gap-2">
                   {isAdmin && onDeleteMemory && (
                     <button
                       type="button"
@@ -575,16 +757,16 @@ export const CampusGallery = ({
                         setActivePhotoIndex(null);
                         onDeleteMemory(targetId);
                       }}
-                      className="px-3 py-1.5 rounded-full bg-rose-600/95 hover:bg-rose-700 text-white text-xs font-extrabold inline-flex items-center gap-1 shadow-lg cursor-pointer"
+                      className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-rose-600/95 hover:bg-rose-700 text-white text-xs font-extrabold inline-flex items-center gap-1 shadow-lg cursor-pointer"
                       title="Delete from Memories (Admin)"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>Delete</span>
+                      <span className="hidden sm:inline">Delete</span>
                     </button>
                   )}
                   <button
                     onClick={() => setActivePhotoIndex(null)}
-                    className="p-2 rounded-full bg-slate-950/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
+                    className="p-1.5 sm:p-2 rounded-full bg-slate-950/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
                     title="Close (Esc)"
                   >
                     <X className="w-5 h-5" />
@@ -592,26 +774,26 @@ export const CampusGallery = ({
                 </div>
 
                 {/* Counter Indicator */}
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/70 text-white text-xs font-semibold backdrop-blur-sm flex items-center gap-1.5">
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 px-3 py-1 rounded-full bg-black/75 text-white text-xs font-semibold backdrop-blur-sm flex items-center gap-1.5 shadow-md border border-white/10">
                   <span>
                     {activePhotoIndex + 1} / {filteredMemories.length}
                   </span>
                   {isVideoUrlOrData(activePhoto) && (
-                    <span className="px-2 py-0.5 rounded bg-rose-600 text-[10px] font-black uppercase">
+                    <span className="px-1.5 py-0.5 rounded bg-rose-600 text-[10px] font-black uppercase">
                       🎬 VIDEO
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Modal Body Info */}
-              <div className="p-5 sm:p-6 bg-white overflow-y-auto">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              {/* Modal Body Info (Compact & Clean padding) */}
+              <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-white border-t border-slate-200/90 overflow-y-auto flex-shrink-0">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#003366] text-white">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#003366] text-white">
                       {lang === 'hi' ? activePhoto.categoryHi : activePhoto.category}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#fc4a00]/10 text-[#fc4a00] border border-[#fc4a00]/30">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-[#fc4a00]/10 text-[#fc4a00] border border-[#fc4a00]/30">
                       {activePhoto.year}
                     </span>
                   </div>
@@ -621,7 +803,7 @@ export const CampusGallery = ({
                       href={activePhoto.fallbackUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors"
                     >
                       <span>mcu.ac.in पर मूल छायाचित्र</span>
                       <ExternalLink className="w-3.5 h-3.5 text-[#fc4a00]" />
@@ -629,11 +811,11 @@ export const CampusGallery = ({
                   )}
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-[#003366] font-editorial mb-2">
+                <h3 className="text-base sm:text-xl font-bold text-[#003366] font-editorial mb-1">
                   {lang === 'hi' ? activePhoto.hindiTitle : activePhoto.title}
                 </h3>
 
-                <p className="text-sm text-slate-700 leading-relaxed font-normal">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                   {lang === 'hi' ? activePhoto.descriptionHi : activePhoto.description}
                 </p>
               </div>
