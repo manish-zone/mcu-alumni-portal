@@ -1,0 +1,133 @@
+# ==============================================================================
+# MCU Alumni Portal — Enterprise Git Ignore Configuration
+# (React + Vite Frontend | Go Microservices Backend | MySQL Database)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment Variables & Sensitive Secrets (NEVER COMMIT)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+*.env
+*.local
+backend/.env
+backend/.env.*
+
+# Keep safe template files tracked in Git
+!.env.example
+!backend/.env.example
+
+# ------------------------------------------------------------------------------
+# 2. Private Keys, Certificates & Credentials
+# ------------------------------------------------------------------------------
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+*.p12
+*.jks
+*.der
+*.csr
+credentials.json
+client_secret*.json
+service-account*.json
+secrets.*
+*secret*.json
+
+# ------------------------------------------------------------------------------
+# 3. Go Backend Compiled Binaries & Build Artifacts
+# ------------------------------------------------------------------------------
+bin/
+backend/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.work.sum
+backend/mcu-backend
+backend/mcu-backend.exe
+backend/microservices
+backend/microservices.exe
+
+# ------------------------------------------------------------------------------
+# 4. Node.js Dependencies & Frontend Production Builds
+# ------------------------------------------------------------------------------
+node_modules/
+dist/
+dist-ssr/
+build/
+.vite/
+.parcel-cache/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# ------------------------------------------------------------------------------
+# 5. Local Databases, Dumps & Backups (Schema/Seed SQL in database/ stays tracked)
+# ------------------------------------------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-shm
+*.db-wal
+*.sql.gz
+*.sql.bak
+*.dump
+
+# ------------------------------------------------------------------------------
+# 6. Logs, Runtime PIDs & Temporary Files
+# ------------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.pid
+*.seed
+*.pid.lock
+tmp/
+temp/
+.cache/
+*.tmp
+*.bak
+*~
+
+# ------------------------------------------------------------------------------
+# 7. IDEs, Editors & AI Assistant Local Configs
+# ------------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.fleet/
+.cursor/
+.gemini/
+.agent/
+.claude/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+
+# ------------------------------------------------------------------------------
+# 8. Operating System Metadata Files (Windows / macOS / Linux)
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
