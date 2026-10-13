@@ -1,42 +1,73 @@
 # ==============================================================================
 # MCU Alumni Portal — Enterprise Git Ignore Configuration
-# (React + Vite Frontend | Go Microservices Backend | MySQL Database)
+# (React 19 + Vite 6 Frontend | Go Microservices Backend | MySQL Enterprise)
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-# 1. Environment Variables & Sensitive Secrets (NEVER COMMIT)
+# 1. Environment Variables, Local Configurations & Secrets (NEVER COMMIT)
 # ------------------------------------------------------------------------------
 .env
 .env.*
+.env*.local
 *.env
+*.env.*
 *.local
+**/.env
+**/.env.*
 backend/.env
 backend/.env.*
 
-# Keep safe template files tracked in Git
+# Keep safe, sanitised documentation templates tracked in Git
 !.env.example
 !backend/.env.example
 
 # ------------------------------------------------------------------------------
-# 2. Private Keys, Certificates & Credentials
+# 2. Private Keys, Certificates, SSH & Cloud Credentials
 # ------------------------------------------------------------------------------
+# SSH & GPG Keys
+id_rsa
+id_rsa*
+id_ecdsa*
+id_ed25519*
 *.pem
 *.key
-*.crt
-*.cer
+*.pkcs8
+*.pkcs12
 *.pfx
 *.p12
 *.jks
+*.keystore
 *.der
 *.csr
+*.crt
+*.cer
+
+# Cloud & Service Account Credentials (GCP, AWS, Firebase, Stripe, etc.)
 credentials.json
+*credentials*.json
 client_secret*.json
 service-account*.json
+*service_account*.json
+*service-account*.json
+google-services.json
+GoogleService-Info.plist
+firebase-adminsdk*.json
 secrets.*
 *secret*.json
+*.secret
+*.secrets
+auth.json
+token.json
+*.token
+*.session
+
+# Package Manager Secrets & Auth Tokens
+.npmrc
+.yarnrc
+.pnpmrc
 
 # ------------------------------------------------------------------------------
-# 3. Go Backend Compiled Binaries & Build Artifacts
+# 3. Go Backend Compiled Binaries, Microservices & Build Artifacts
 # ------------------------------------------------------------------------------
 bin/
 backend/bin/
@@ -66,9 +97,12 @@ build/
 .turbo/
 coverage/
 *.tsbuildinfo
+.eslintcache
+.stylelintcache
 
 # ------------------------------------------------------------------------------
-# 5. Local Databases, Dumps & Backups (Schema/Seed SQL in database/ stays tracked)
+# 5. Local Databases, SQL Dumps & Backups
+# (Core database/schema.sql & database/seed_data.sql REMAIN TRACKED)
 # ------------------------------------------------------------------------------
 *.db
 *.sqlite
@@ -77,14 +111,26 @@ coverage/
 *.db-shm
 *.db-wal
 *.sql.gz
+*.sql.tar.gz
+*.sql.zip
 *.sql.bak
 *.dump
+*dump*.sql
+*backup*.sql
+backup*.sql
+dump*.sql
+*.rdb
+
+# Preserve university schema & seed SQL templates
+!database/schema.sql
+!database/seed_data.sql
 
 # ------------------------------------------------------------------------------
 # 6. Logs, Runtime PIDs & Temporary Files
 # ------------------------------------------------------------------------------
 logs/
 *.log
+*.log.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -99,9 +145,16 @@ temp/
 *.tmp
 *.bak
 *~
+*.orig
+
+# Crash dumps
+*.dmp
+core
+core.*
+hs_err_pid*
 
 # ------------------------------------------------------------------------------
-# 7. IDEs, Editors & AI Assistant Local Configs
+# 7. IDEs, Editors & AI Coding Assistant Local Configs
 # ------------------------------------------------------------------------------
 .vscode/*
 !.vscode/extensions.json
@@ -111,6 +164,12 @@ temp/
 .gemini/
 .agent/
 .claude/
+.windsurf/
+.zed/
+.copilot/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
 *.suo
 *.ntvs*
 *.njsproj
@@ -120,7 +179,7 @@ temp/
 *.swo
 
 # ------------------------------------------------------------------------------
-# 8. Operating System Metadata Files (Windows / macOS / Linux)
+# 8. Operating System Metadata & Thumbnail Caches (Windows / macOS / Linux)
 # ------------------------------------------------------------------------------
 .DS_Store
 .DS_Store?
@@ -130,4 +189,5 @@ temp/
 ehthumbs.db
 Thumbs.db
 Desktop.ini
+desktop.ini
 $RECYCLE.BIN/
