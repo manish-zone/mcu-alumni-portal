@@ -57,6 +57,16 @@ export const CampusGallery = ({
     const seenSrc = new Set();
     return raw.filter((item) => {
       if (!item || duplicateEventIds.has(String(item.id))) return false;
+
+      const key = item.id || item.videoUrl || item.image || '';
+      if (!key || seenSrc.has(key)) return false;
+      seenSrc.add(key);
+
+      // ALWAYS retain admin uploaded memories without any restriction!
+      if (item.uploaded_by_admin || String(item.id).startsWith('mem-admin-')) {
+        return true;
+      }
+
       const cat = String(item.category || '').toLowerCase();
       const catHi = String(item.categoryHi || '').toLowerCase();
       const title = String(item.title || '').toLowerCase();
@@ -96,33 +106,73 @@ export const CampusGallery = ({
 
       if (!isComputerDept && !isLibrary && !isAuditorium && !isComputer) return false;
 
-      const key = item.id || item.videoUrl || item.image || '';
-      if (!key || seenSrc.has(key)) return false;
-      seenSrc.add(key);
       return true;
     });
   }, [externalMemories]);
+
+  // Robust category matcher for tabs, pills and admin uploads
+  const matchCategory = (item, targetCat) => {
+    if (!item || !targetCat || targetCat === 'All') return true;
+    const cat = String(item.category || '').toLowerCase();
+    const catHi = String(item.categoryHi || '').toLowerCase();
+    const title = String(item.title || '').toLowerCase();
+    const isAdminUpload = Boolean(item.uploaded_by_admin || String(item.id).startsWith('mem-admin-'));
+
+    if (targetCat === 'Computer Department') {
+      return (
+        cat === 'computer department' ||
+        cat.includes('computer department') ||
+        cat.includes('dept of computer') ||
+        catHi.includes('कंप्यूटर विभाग') ||
+        title.includes('computer department') ||
+        title.includes('computer applications') ||
+        (isAdminUpload &&
+          !cat.includes('library') &&
+          !cat.includes('auditorium') &&
+          !cat.includes('computer labs') &&
+          !cat.includes('media lab'))
+      );
+    }
+
+    if (targetCat === 'Library') {
+      return (
+        cat === 'library' ||
+        cat.includes('library') ||
+        catHi.includes('ग्रंथालय') ||
+        title.includes('library')
+      );
+    }
+
+    if (targetCat === 'Computer Labs') {
+      return (
+        cat === 'computer labs' ||
+        cat.includes('computer labs') ||
+        cat === 'media labs' ||
+        cat === 'computer' ||
+        catHi.includes('कंप्यूटर व डिजिटल') ||
+        catHi.includes('डिजिटल मीडिया') ||
+        title.includes('computer lab') ||
+        title.includes('digital lab')
+      );
+    }
+
+    if (targetCat === 'Auditorium') {
+      return (
+        cat === 'auditorium' ||
+        cat.includes('auditorium') ||
+        catHi.includes('सभागार') ||
+        title.includes('auditorium')
+      );
+    }
+
+    return item.category === targetCat;
+  };
 
   // Dynamically derive available years from memories (strictly valid 4-digit years)
   const availableYears = useMemo(() => {
     const yearSet = new Set();
     effectiveMemories.forEach((item) => {
-      if (selectedCategory !== 'All') {
-        let matchesCat = false;
-        if (selectedCategory === 'Computer Department') {
-          matchesCat =
-            item.category === 'Computer Department' ||
-            String(item.categoryHi || '').includes('कंप्यूटर विभाग');
-        } else if (selectedCategory === 'Computer Labs') {
-          matchesCat =
-            item.category === 'Computer Labs' ||
-            item.category === 'Media Labs' ||
-            item.category === 'Computer';
-        } else {
-          matchesCat = item.category === selectedCategory;
-        }
-        if (!matchesCat) return;
-      }
+      if (!matchCategory(item, selectedCategory)) return;
       const yrStr = String(item.year || '').trim();
       if (/^\d{4}$/.test(yrStr)) {
         yearSet.add(yrStr);
@@ -164,36 +214,28 @@ export const CampusGallery = ({
 
   const filteredMemories = useMemo(() => {
     return effectiveMemories.filter((item) => {
-      let matchesCat = true;
-      if (selectedCategory !== 'All') {
-        if (selectedCategory === 'Computer Department') {
-          matchesCat =
-            item.category === 'Computer Department' ||
-            item.category === 'Dept of Computer Science' ||
-            String(item.categoryHi || '').includes('कंप्यूटर विभाग') ||
-            String(item.title || '').toLowerCase().includes('computer department') ||
-            String(item.title || '').toLowerCase().includes('computer applications');
-        } else if (selectedCategory === 'Computer Labs') {
-          matchesCat =
-            item.category === 'Computer Labs' ||
-            item.category === 'Media Labs' ||
-            item.category === 'Computer' ||
-            String(item.categoryHi || '').includes('कंप्यूटर व डिजिटल') ||
-            String(item.categoryHi || '').includes('डिजिटल मीडिया');
-        } else {
-          matchesCat = item.category === selectedCategory;
-        }
-      }
+      const matchesCat = matchCategory(item, selectedCategory);
       const matchesYear = selectedYear === 'All' || String(item.year) === String(selectedYear);
       return matchesCat && matchesYear;
     });
   }, [effectiveMemories, selectedCategory, selectedYear]);
 
-  // Reset to first page when category, year, or memory count changes
+  // When new memory items are added, automatically reset filters to All so they are immediately visible
+  const prevCountRef = useRef(effectiveMemories.length);
+  useEffect(() => {
+    if (effectiveMemories.length > prevCountRef.current) {
+      setSelectedCategory('All');
+      setSelectedYear('All');
+    }
+    prevCountRef.current = effectiveMemories.length;
+    setCurrentPage(1);
+    setActivePhotoIndex(null);
+  }, [effectiveMemories.length]);
+
   useEffect(() => {
     setCurrentPage(1);
     setActivePhotoIndex(null);
-  }, [selectedCategory, selectedYear, effectiveMemories.length]);
+  }, [selectedCategory, selectedYear]);
 
   const totalPages = Math.ceil(filteredMemories.length / itemsPerPage) || 1;
 

@@ -146,7 +146,7 @@ export const AdminPanelModal = ({
     hindiTitle: '',
     year: '2026',
     customYear: '',
-    category: 'Spandan Fest',
+    category: 'Computer Department',
     campus: 'Bhopal',
     description: '',
     image: '',
@@ -3901,9 +3901,9 @@ export const AdminPanelModal = ({
                           onChange={(e) => setMemoryForm((p) => ({ ...p, category: e.target.value }))}
                           className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-sky-200 text-sm font-bold text-[#003366]"
                         >
-                          {Object.keys(CATEGORY_LABELS).map((cat) => (
-                            <option key={cat} value={cat}>
-                              {cat}
+                          {Object.entries(CATEGORY_LABELS).map(([catKey, catObj]) => (
+                            <option key={catKey} value={catKey}>
+                              {lang === 'hi' ? `${catObj.hi} (${catKey})` : catObj.en}
                             </option>
                           ))}
                         </select>
@@ -3919,7 +3919,7 @@ export const AdminPanelModal = ({
                           type="text"
                           value={memoryForm.title}
                           onChange={(e) => setMemoryForm((p) => ({ ...p, title: e.target.value }))}
-                          placeholder="e.g., Spandan Cultural Fest Performance Video / Photo 2026"
+                          placeholder="e.g., Computer Science Department Lab / Nalanda Library 2026"
                           className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-sky-200 text-sm"
                         />
                       </div>
