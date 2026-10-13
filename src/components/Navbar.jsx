@@ -93,11 +93,11 @@ export const Navbar = ({
 
         // Only compute desktop nav dock & active section state on desktop viewports (>= 1024px)
         if (isDesktopViewport) {
-          if (y <= 20) {
+          if (y <= 30) {
             setNavDockHidden((prev) => (prev ? false : prev));
-          } else if (delta > 3 && y > 50) {
+          } else if (delta > 30 && y > 200) {
             setNavDockHidden((prev) => (prev ? prev : true));
-          } else if (delta < -1) {
+          } else if (delta < -18) {
             setNavDockHidden((prev) => (prev ? false : prev));
           }
 
@@ -222,10 +222,10 @@ export const Navbar = ({
     <header className="fixed top-0 left-0 right-0 z-40">
       {/* Main Brand & Utilities Bar in 3D Water-Glass (Liquid Crystal 3D Glassmorphism) */}
       <div
-        className={`relative z-30 transition-[padding,box-shadow] duration-200 overflow-visible ${
+        className={`relative z-30 transition-[box-shadow,border-color,background-color] duration-200 overflow-visible py-2 sm:py-2.5 ${
           isScrolled
-            ? 'bg-gradient-to-b from-white/98 via-sky-50/96 to-sky-100/95 sm:from-white/92 sm:via-sky-50/88 sm:to-sky-100/85 sm:backdrop-blur-md py-1.5 sm:py-2 border-b-2 border-sky-300/75 shadow-[0_10px_24px_-8px_rgba(2,132,199,0.18),inset_0_2px_3px_rgba(255,255,255,1)]'
-            : 'bg-gradient-to-b from-white/96 via-sky-50/94 to-cyan-100/92 sm:from-white/90 sm:via-sky-50/82 sm:to-cyan-100/76 sm:backdrop-blur-md py-2.5 sm:py-3 border-b-2 border-sky-300/65 shadow-[0_8px_20px_-6px_rgba(2,132,199,0.14),inset_0_2px_3px_rgba(255,255,255,1)]'
+            ? 'bg-gradient-to-b from-white/98 via-sky-50/96 to-sky-100/95 sm:from-white/92 sm:via-sky-50/88 sm:to-sky-100/85 sm:backdrop-blur-md border-b-2 border-sky-300/75 shadow-[0_10px_24px_-8px_rgba(2,132,199,0.18),inset_0_2px_3px_rgba(255,255,255,1)]'
+            : 'bg-gradient-to-b from-white/96 via-sky-50/94 to-cyan-100/92 sm:from-white/90 sm:via-sky-50/82 sm:to-cyan-100/76 sm:backdrop-blur-md border-b-2 border-sky-300/65 shadow-[0_8px_20px_-6px_rgba(2,132,199,0.14),inset_0_2px_3px_rgba(255,255,255,1)]'
         }`}
       >
         {/* 3D Water-Glass Curved Glossy Dome & Specular Rim */}

@@ -44,18 +44,26 @@ function TechBackground3D({ bgImgRef }) {
     let currentY = targetY;
     let rafId = null;
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
     const tick = () => {
       const diff = targetY - currentY;
-      if (Math.abs(diff) > 0.15) {
-        currentY += diff * 0.085;
+      if (Math.abs(diff) > 0.2) {
+        currentY += diff * 0.14;
         rafId = requestAnimationFrame(tick);
       } else {
         currentY = targetY;
         rafId = null;
       }
 
-      // Only animate while hero is near viewport
-      if (currentY > 1300) return;
+      // If hero is scrolled past viewport, pause updates to preserve 100% scroll performance
+      if (currentY > 1200) {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        return;
+      }
 
       const pY = currentY * 0.35;
 
@@ -69,20 +77,22 @@ function TechBackground3D({ bgImgRef }) {
         svgCircuitRef.current.style.transform = `translate3d(0, ${(pY * 0.12).toFixed(1)}px, 0)`;
       }
 
-      HERO_SYMBOLS.forEach((s, idx) => {
-        const el = tileRefs.current[idx];
-        if (el) {
-          const ty = (pY * s.mul).toFixed(1);
-          const ry = (s.rot + pY * 0.045).toFixed(1);
-          const rx = (pY * 0.03).toFixed(1);
-          el.style.transform = `perspective(600px) translate3d(0, ${ty}px, 14px) rotateY(${ry}deg) rotateX(${rx}deg)`;
-        }
-      });
+      if (!isMobile) {
+        HERO_SYMBOLS.forEach((s, idx) => {
+          const el = tileRefs.current[idx];
+          if (el) {
+            const ty = (pY * s.mul).toFixed(1);
+            const ry = (s.rot + pY * 0.045).toFixed(1);
+            const rx = (pY * 0.03).toFixed(1);
+            el.style.transform = `perspective(600px) translate3d(0, ${ty}px, 14px) rotateY(${ry}deg) rotateX(${rx}deg)`;
+          }
+        });
+      }
     };
 
     const onScroll = () => {
       targetY = window.scrollY || 0;
-      if (!rafId && targetY <= 1350) {
+      if (!rafId && targetY <= 1250) {
         rafId = requestAnimationFrame(tick);
       }
     };
@@ -113,9 +123,14 @@ function TechBackground3D({ bgImgRef }) {
           `,
           backgroundSize: '56px 56px',
           transformOrigin: '50% 0%',
-          maskImage: 'radial-gradient(ellipse 82% 72% at 50% 35%, #000 35%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 82% 72% at 50% 35%, #000 35%, transparent 100%)',
           willChange: 'transform',
+        }}
+      />
+      {/* Soft Vignette Overlay for Depth without expensive CSS maskImage penalty */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 82% 72% at 50% 35%, transparent 35%, #f4faff 100%)',
         }}
       />
 

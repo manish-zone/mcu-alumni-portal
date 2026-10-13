@@ -310,6 +310,18 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: auto;
+}
+
+/* Section-level containment for ultra-smooth 60/120fps scrolling on mobile & desktop */
+#directory,
+#mentorship,
+#jobs,
+#events,
+#gallery,
+#giving {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 850px;
 }
 
 /* 6-Faced 3D Translucent Cube Faces (for Ambient3DBackground) */
@@ -447,19 +459,15 @@ html {
 @keyframes mcu-logo-3d-medallion {
   0%, 100% {
     transform: perspective(900px) translate3d(0, 0px, 10px) rotateY(-8deg) rotateX(4deg) scale3d(1, 1, 1);
-    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
   }
   25% {
     transform: perspective(900px) translate3d(0, -4px, 16px) rotateY(0deg) rotateX(6deg) scale3d(1.03, 1.03, 1);
-    filter: drop-shadow(-4px 14px 20px rgba(252, 74, 0, 0.28));
   }
   50% {
     transform: perspective(900px) translate3d(0, -7px, 20px) rotateY(8deg) rotateX(-4deg) scale3d(1.045, 1.045, 1);
-    filter: drop-shadow(4px 16px 22px rgba(245, 158, 11, 0.32));
   }
   75% {
     transform: perspective(900px) translate3d(0, -3px, 14px) rotateY(0deg) rotateX(-5deg) scale3d(1.02, 1.02, 1);
-    filter: drop-shadow(0 12px 18px rgba(104, 10, 19, 0.38));
   }
 }
 
@@ -518,7 +526,8 @@ html {
 
 .mcu-logo-3d-alive {
   animation: mcu-logo-3d-medallion 7s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-  will-change: transform, filter;
+  filter: drop-shadow(0 12px 20px rgba(0, 34, 68, 0.28));
+  will-change: transform;
   transform-style: preserve-3d;
 }
 
