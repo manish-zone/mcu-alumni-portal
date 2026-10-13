@@ -56,7 +56,12 @@ export const EventsSection = ({
       .map((arch) => {
         const galleryArr = Array.isArray(arch.gallery) ? arch.gallery : [];
         const cleanGallery = galleryArr.filter((g) => {
-          if (!g || !g.src || g.isGif) return false;
+          if (!g || !g.src) return false;
+          // ALWAYS preserve photos in admin uploaded albums or individually uploaded by admin!
+          if (arch.uploaded_by_admin || g.uploaded_by_admin || String(arch.id).startsWith('arch-admin-')) {
+            return true;
+          }
+          if (g.isGif) return false;
           if (String(g.src).startsWith('https://www.mcu.ac.in/') && !g.fallback) return false;
           if (seenGlobalSrc.has(g.src)) return false;
           seenGlobalSrc.add(g.src);
@@ -64,7 +69,7 @@ export const EventsSection = ({
         });
         return { ...arch, gallery: cleanGallery };
       })
-      .filter((arch) => arch.gallery.length > 0 || arch.uploaded_by_admin);
+      .filter((arch) => arch.gallery.length > 0 || arch.uploaded_by_admin || String(arch.id).startsWith('arch-admin-'));
   }, [archiveEvents]);
 
   const activeUpcoming = Array.isArray(upcomingEventsList) ? upcomingEventsList : defaultUpcomingEvents;
@@ -73,7 +78,10 @@ export const EventsSection = ({
     const raw = Array.isArray(slidesList) && slidesList.length > 0 ? slidesList : defaultAbhyudaySlides;
     const seen = new Set();
     return raw.filter((s) => {
-      if (!s || !s.image || seen.has(s.image)) return false;
+      if (!s || !s.image) return false;
+      // Always retain admin uploaded slides
+      if (s.uploaded_by_admin || String(s.id).startsWith('slide-admin-')) return true;
+      if (seen.has(s.image)) return false;
       seen.add(s.image);
       return true;
     });
@@ -90,6 +98,15 @@ export const EventsSection = ({
       setActiveSlide(Math.max(0, activeSlides.length - 1));
     }
   }, [activeSlides.length, activeSlide]);
+
+  // When a new slide is uploaded by admin, automatically display it immediately
+  const prevSlideCountRef = useRef(activeSlides.length);
+  useEffect(() => {
+    if (activeSlides.length > prevSlideCountRef.current) {
+      setActiveSlide(0);
+    }
+    prevSlideCountRef.current = activeSlides.length;
+  }, [activeSlides.length]);
 
   // Track whether the slide showcase is in viewport without triggering React state re-renders
   useEffect(() => {
@@ -122,16 +139,33 @@ export const EventsSection = ({
   const [upcomingPage, setUpcomingPage] = useState(1);
   const upcomingItemsPerPage = 3; // 3 conclave cards per row/page
 
-  // Auto-show newly uploaded Event Album on Page 1
-  const prevTopArchiveIdRef = useRef(activeArchive[0]?.id);
+  // When a new event album or new photos are added by admin, auto-reset to 'all' years and Page 1
+  const prevArchiveLenRef = useRef(activeArchive.length);
+  const prevTotalPhotosRef = useRef(
+    activeArchive.reduce((acc, ev) => acc + (ev?.gallery?.length || 0), 0)
+  );
+
   useEffect(() => {
-    const currentTopId = activeArchive[0]?.id;
-    if (currentTopId && prevTopArchiveIdRef.current && currentTopId !== prevTopArchiveIdRef.current) {
+    const currentTotalPhotos = activeArchive.reduce((acc, ev) => acc + (ev?.gallery?.length || 0), 0);
+    if (
+      activeArchive.length > prevArchiveLenRef.current ||
+      currentTotalPhotos > prevTotalPhotosRef.current
+    ) {
       setSelectedYear('all');
       setArchivePage(1);
     }
-    prevTopArchiveIdRef.current = currentTopId;
+    prevArchiveLenRef.current = activeArchive.length;
+    prevTotalPhotosRef.current = currentTotalPhotos;
   }, [activeArchive]);
+
+  // When new upcoming conclaves are added, auto-reset to Page 1
+  const prevUpcomingCountRef = useRef(activeUpcoming.length);
+  useEffect(() => {
+    if (activeUpcoming.length > prevUpcomingCountRef.current) {
+      setUpcomingPage(1);
+    }
+    prevUpcomingCountRef.current = activeUpcoming.length;
+  }, [activeUpcoming.length]);
 
   const featured = activeUpcoming.find((e) => e.featured) || activeUpcoming[0] || null;
   const remaining = featured ? activeUpcoming.filter((e) => e.id !== featured.id) : [];

@@ -857,6 +857,7 @@ export const AdminPanelModal = ({
           eventForm.photoCaption.trim() ||
           item.title ||
           `${targetAlbum.title || targetAlbum.hindiTitle} — Photo ${idx + 1}`,
+        uploaded_by_admin: true,
       }));
 
       if (onAddPhotosToArchiveEvent) {
@@ -898,6 +899,7 @@ export const AdminPanelModal = ({
         eventForm.photoCaption.trim() ||
         item.title ||
         `${resolvedTitle} — Moment ${idx + 1}`,
+      uploaded_by_admin: true,
     }));
 
     const newEventAlbum = {
@@ -971,6 +973,7 @@ export const AdminPanelModal = ({
       description:
         upcomingForm.description.trim() ||
         `Official upcoming conclave "${resolvedTitle}" organized at ${upcomingForm.location.trim() || 'MCU Bhopal'}. Register your RSVP now.`,
+      uploaded_by_admin: true,
     };
 
     if (onAddUpcomingEvent) {
@@ -1054,6 +1057,7 @@ export const AdminPanelModal = ({
       titleEn: resolvedTitleEn,
       caption: resolvedCaptionHi,
       captionEn: resolvedCaptionEn,
+      uploaded_by_admin: true,
     };
 
     if (onAddEventSlide) {
