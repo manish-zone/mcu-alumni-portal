@@ -313,17 +313,6 @@ html {
   scroll-behavior: auto;
 }
 
-/* Section-level containment for ultra-smooth 60/120fps scrolling on mobile & desktop */
-#directory,
-#mentorship,
-#jobs,
-#events,
-#gallery,
-#giving {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 850px;
-}
-
 /* 6-Faced 3D Translucent Cube Faces (for Ambient3DBackground) */
 .mcu-cube-face {
   position: absolute;

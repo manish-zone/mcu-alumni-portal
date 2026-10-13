@@ -9,14 +9,6 @@ if (typeof window !== 'undefined') {
   isCoarsePointerDevice =
     window.matchMedia('(pointer: coarse)').matches ||
     window.matchMedia('(hover: none)').matches;
-
-  window.addEventListener(
-    'scroll',
-    () => {
-      globalLastScrollTime = performance.now();
-    },
-    { passive: true }
-  );
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -339,6 +331,7 @@ export function ScrollProgressHUD() {
     };
 
     const onScroll = () => {
+      globalLastScrollTime = performance.now();
       if (!rafId) rafId = requestAnimationFrame(updateHUD);
     };
 
@@ -355,18 +348,11 @@ export function ScrollProgressHUD() {
     applyActiveSectionDOM(0);
     updateHUD();
 
-    let ro = null;
-    if (typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(onResize);
-      ro.observe(document.body);
-    }
-
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize, { passive: true });
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
-      if (ro) ro.disconnect();
       if (resizeTimer) clearTimeout(resizeTimer);
       if (rafId) cancelAnimationFrame(rafId);
     };
