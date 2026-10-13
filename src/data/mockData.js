@@ -612,7 +612,33 @@ export const campusMemories = [
     descriptionHi: "पंडित माखनलाल चतुर्वेदी जी के 'कर्मवीर' के ऐतिहासिक अंकों एवं स्वतंत्रता संग्राम की पत्रकारिता का दुर्लभ संग्रह।"
   },
 
-  // 2. Computer & Digital Labs
+  // 2. Computer Department
+  {
+    id: "mem-dept-1",
+    title: "Department of Computer Applications: Core Computing Lab",
+    hindiTitle: "कंप्यूटर अनुप्रयोग एवं विज्ञान विभाग: मुख्य कंप्यूटिंग लैब",
+    category: "Computer Department",
+    categoryHi: "कंप्यूटर विभाग",
+    year: "2024",
+    image: "/memories/it-infrastructure.jpg",
+    fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/media-lab-01.jpg",
+    description: "Academic computing hub for MCA, BCA, and Computer Science students studying algorithms, data structures, and enterprise software systems.",
+    descriptionHi: "एमसीए एवं बीसीए विद्यार्थियों के लिए समर्पित मुख्य कंप्यूटर लैब, जहाँ सॉफ्टवेयर, एल्गोरिदम व डेटाबेस का प्रायोगिक अध्ययन होता है।"
+  },
+  {
+    id: "mem-dept-2",
+    title: "Computer Department: Software Engineering & AI Workstations",
+    hindiTitle: "कंप्यूटर विभाग: सॉफ्टवेयर इंजीनियरिंग एवं एआई वर्कस्टेशन्स",
+    category: "Computer Department",
+    categoryHi: "कंप्यूटर विभाग",
+    year: "2024",
+    image: "/memories/media-lab-02.jpg",
+    fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/media-lab-02.jpg",
+    description: "High-spec workstations for cloud computing, machine learning, systems architecture, and full-stack software development projects.",
+    descriptionHi: "क्लाउड कंप्यूटिंग, मशीन लर्निंग एवं सॉफ्टवेयर इंजीनियरिंग प्रोजेक्ट्स हेतु उच्च क्षमता कंप्यूटर वर्कस्टेशन्स।"
+  },
+
+  // 3. Computer & Digital Labs
   {
     id: "mem-lab-1",
     title: "Digital Newsroom & Computer Pagination Lab",
@@ -626,18 +652,6 @@ export const campusMemories = [
     descriptionHi: "छात्र समाचार पत्रों के संपादन, कंप्यूटर पेज लेआउट डिजाइनिंग और वेब सीएमएस पब्लिशिंग की अत्याधुनिक लैब।"
   },
   {
-    id: "mem-lab-2",
-    title: "High-Performance Graphic & Web Journalism Workstations",
-    hindiTitle: "ग्राफिक्स एवं मल्टीमीडिया कंप्यूटर लैब",
-    category: "Computer Labs",
-    categoryHi: "कंप्यूटर व डिजिटल लैब",
-    year: "2024",
-    image: "/memories/media-lab-02.jpg",
-    fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/media-lab-02.jpg",
-    description: "Computer workstations for media analytics, data journalism, infographic creation, and visual storytelling suites.",
-    descriptionHi: "डेटा पत्रकारिता, विजुअल स्टोरीटेलिंग एवं इंफोग्राफिक्स निर्माण हेतु विशेष कंप्यूटर वर्कस्टेशन्स।"
-  },
-  {
     id: "mem-video-1",
     title: "4K Non-Linear Video Editing Computer Suites",
     hindiTitle: "4K नॉन-लीनियर वीडियो एडिटिंग कंप्यूटर सुइट्स",
@@ -648,18 +662,6 @@ export const campusMemories = [
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/video-editing-suite.jpg",
     description: "Dedicated computer post-production bays equipped with Premiere Pro, DaVinci Resolve, and multi-track audio suites.",
     descriptionHi: "वृत्तचित्र, टेलीविज़न न्यूज़ पैकेज एवं फ़िल्म संपादन हेतु अत्याधुनिक नॉन-लीनियर कंप्यूटर एडिटिंग सुइट।"
-  },
-  {
-    id: "mem-it-1",
-    title: "High-Speed IT Infrastructure & Campus Computing Hub",
-    hindiTitle: "हाई-स्पीड आईटी इन्फ्रास्ट्रक्चर एवं कंप्यूटर नेटवर्क हब",
-    category: "Computer Labs",
-    categoryHi: "कंप्यूटर व डिजिटल लैब",
-    year: "2024",
-    image: "/memories/it-infrastructure.jpg",
-    fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/media-lab-01.jpg",
-    description: "Gigabit optical fiber backbone supporting campus servers, cloud computing, digital broadcasting, and research.",
-    descriptionHi: "गीगाबिट ऑप्टिकल फाइबर और आधुनिक सर्वर से जुड़ा विश्वविद्यालय का उन्नत कंप्यूटर व तकनीकी केंद्र।"
   },
 
   // 3. Auditorium & Halls

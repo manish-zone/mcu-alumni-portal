@@ -47,6 +47,7 @@ import {
 } from '../utils/imageProcessor';
 
 const CATEGORY_LABELS = {
+  'Computer Department': { en: 'Computer Department', hi: 'कंप्यूटर विभाग' },
   Library: { en: 'Nalanda Central Library', hi: 'नालंदा केंद्रीय ग्रंथालय' },
   'Computer Labs': { en: 'Computer & Digital Labs', hi: 'कंप्यूटर व डिजिटल लैब' },
   Auditorium: { en: 'Auditorium & Halls', hi: 'सभागार व परिसर' },

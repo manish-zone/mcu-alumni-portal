@@ -72,7 +72,13 @@ export const CampusGallery = ({
         return false;
       }
 
-      // Check if it belongs to Library, Auditorium, or Computer / Digital Labs
+      // Check if it belongs to Computer Department, Library, Auditorium, or Computer / Digital Labs
+      const isComputerDept =
+        cat.includes('computer department') ||
+        cat.includes('dept of computer') ||
+        catHi.includes('कंप्यूटर विभाग') ||
+        title.includes('computer department') ||
+        title.includes('computer applications');
       const isLibrary = cat.includes('library') || catHi.includes('ग्रंथालय') || title.includes('library');
       const isAuditorium = cat.includes('auditorium') || catHi.includes('सभागार') || title.includes('auditorium');
       const isComputer =
@@ -88,9 +94,9 @@ export const CampusGallery = ({
         title.includes('infrastructure') ||
         title.includes('computing');
 
-      if (!isLibrary && !isAuditorium && !isComputer) return false;
+      if (!isComputerDept && !isLibrary && !isAuditorium && !isComputer) return false;
 
-      const key = item.videoUrl || item.image || '';
+      const key = item.id || item.videoUrl || item.image || '';
       if (!key || seenSrc.has(key)) return false;
       seenSrc.add(key);
       return true;
@@ -102,10 +108,19 @@ export const CampusGallery = ({
     const yearSet = new Set();
     effectiveMemories.forEach((item) => {
       if (selectedCategory !== 'All') {
-        const matchesCat =
-          selectedCategory === 'Computer Labs'
-            ? item.category === 'Computer Labs' || item.category === 'Media Labs' || item.category === 'Computer'
-            : item.category === selectedCategory;
+        let matchesCat = false;
+        if (selectedCategory === 'Computer Department') {
+          matchesCat =
+            item.category === 'Computer Department' ||
+            String(item.categoryHi || '').includes('कंप्यूटर विभाग');
+        } else if (selectedCategory === 'Computer Labs') {
+          matchesCat =
+            item.category === 'Computer Labs' ||
+            item.category === 'Media Labs' ||
+            item.category === 'Computer';
+        } else {
+          matchesCat = item.category === selectedCategory;
+        }
         if (!matchesCat) return;
       }
       const yrStr = String(item.year || '').trim();
@@ -124,9 +139,26 @@ export const CampusGallery = ({
         labelEn: `All Memories (${effectiveMemories.length})`,
         labelHi: `सभी स्मृतियां (${effectiveMemories.length})`,
       },
-      { id: 'Library', labelEn: 'Nalanda Central Library', labelHi: 'नालंदा केंद्रीय ग्रंथालय' },
-      { id: 'Computer Labs', labelEn: 'Computer & Digital Labs', labelHi: 'कंप्यूटर व डिजिटल लैब' },
-      { id: 'Auditorium', labelEn: 'Auditorium & Halls', labelHi: 'सभागार व परिसर' },
+      {
+        id: 'Computer Department',
+        labelEn: 'Computer Department',
+        labelHi: 'कंप्यूटर विभाग',
+      },
+      {
+        id: 'Library',
+        labelEn: 'Nalanda Central Library',
+        labelHi: 'नालंदा केंद्रीय ग्रंथालय',
+      },
+      {
+        id: 'Computer Labs',
+        labelEn: 'Computer & Digital Labs',
+        labelHi: 'कंप्यूटर व डिजिटल लैब',
+      },
+      {
+        id: 'Auditorium',
+        labelEn: 'Auditorium & Halls',
+        labelHi: 'सभागार व परिसर',
+      },
     ];
   }, [effectiveMemories]);
 
@@ -134,13 +166,20 @@ export const CampusGallery = ({
     return effectiveMemories.filter((item) => {
       let matchesCat = true;
       if (selectedCategory !== 'All') {
-        if (selectedCategory === 'Computer Labs') {
+        if (selectedCategory === 'Computer Department') {
+          matchesCat =
+            item.category === 'Computer Department' ||
+            item.category === 'Dept of Computer Science' ||
+            String(item.categoryHi || '').includes('कंप्यूटर विभाग') ||
+            String(item.title || '').toLowerCase().includes('computer department') ||
+            String(item.title || '').toLowerCase().includes('computer applications');
+        } else if (selectedCategory === 'Computer Labs') {
           matchesCat =
             item.category === 'Computer Labs' ||
             item.category === 'Media Labs' ||
             item.category === 'Computer' ||
-            String(item.categoryHi || '').includes('कंप्यूटर') ||
-            String(item.categoryHi || '').includes('डिजिटल');
+            String(item.categoryHi || '').includes('कंप्यूटर व डिजिटल') ||
+            String(item.categoryHi || '').includes('डिजिटल मीडिया');
         } else {
           matchesCat = item.category === selectedCategory;
         }
