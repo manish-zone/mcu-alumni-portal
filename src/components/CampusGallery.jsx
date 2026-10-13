@@ -629,12 +629,12 @@ export const CampusGallery = ({
             onClick={() => setActivePhotoIndex(null)}
           >
             <div
-              className="bg-slate-950/95 max-w-3xl lg:max-w-4xl w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 shadow-2xl relative flex flex-col max-h-[85vh]"
+              className="bg-slate-950/95 max-w-3xl md:max-w-[760px] w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 shadow-2xl relative flex flex-col max-h-[88vh]"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Image / Video Header (Reduced, perfectly proportioned) */}
+              {/* Modal Image / Video Header (Reduced width, perfectly fitted image) */}
               <div
-                className="relative w-full h-[44vh] sm:h-[50vh] md:h-[54vh] bg-slate-950 flex items-center justify-center overflow-hidden select-none p-2 sm:p-4"
+                className="relative w-full h-[42vh] sm:h-[48vh] md:h-[52vh] bg-slate-950 flex items-center justify-center overflow-hidden select-none p-2 sm:p-3"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -791,9 +791,9 @@ export const CampusGallery = ({
                 </div>
               </div>
 
-              {/* Modal Body Info (Transparent Dark Glassmorphic Bar) */}
+              {/* Modal Body Info (Properly Padded Docked Area so Image Remains Fully Visible) */}
               <div
-                className="px-4 py-2.5 sm:px-6 sm:py-3 bg-slate-950/85 backdrop-blur-md border-t border-white/10 text-white flex flex-col gap-1 flex-shrink-0"
+                className="px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-950/90 backdrop-blur-md border-t border-white/10 text-white flex flex-col gap-1.5 flex-shrink-0"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
