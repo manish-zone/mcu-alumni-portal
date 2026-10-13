@@ -48,11 +48,8 @@ import {
 
 const CATEGORY_LABELS = {
   Library: { en: 'Nalanda Central Library', hi: 'नालंदा केंद्रीय ग्रंथालय' },
-  Studios: { en: 'Broadcast Studios', hi: 'स्टूडियो व प्रसारण' },
-  'Media Labs': { en: 'Digital Media Labs', hi: 'डिजिटल मीडिया लैब' },
+  'Computer Labs': { en: 'Computer & Digital Labs', hi: 'कंप्यूटर व डिजिटल लैब' },
   Auditorium: { en: 'Auditorium & Halls', hi: 'सभागार व परिसर' },
-  'Spandan Fest': { en: 'Cultural Spandan', hi: 'सांस्कृतिक स्पंदन' },
-  Heritage: { en: 'Alumni Heritage', hi: 'धरोहर व स्थापना' },
 };
 
 const STANDARD_YEARS = [

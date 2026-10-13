@@ -569,7 +569,7 @@ export const campusMemories = [
     hindiTitle: "नालंदा केंद्रीय ग्रंथालय: मुख्य वाचनालय एवं संदर्भ कक्ष",
     category: "Library",
     categoryHi: "केंद्रीय ग्रंथालय",
-    year: "Nalanda Archives",
+    year: "2024",
     image: "/memories/library-01.jpeg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/12/Nalanda-Central-Library-01.jpeg",
     description: "The serene heart of journalistic research housing over 50,000 media volumes, bound volumes of historic newspapers, and academic journals.",
@@ -581,7 +581,7 @@ export const campusMemories = [
     hindiTitle: "राष्ट्रीय एवं अंतरराष्ट्रीय शोध पत्रिका संग्रह",
     category: "Library",
     categoryHi: "केंद्रीय ग्रंथालय",
-    year: "Research Wing",
+    year: "2024",
     image: "/memories/library-02.jpeg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/12/Nalanda-Central-Library-05.jpeg",
     description: "Dedicated research stacks where generations of doctoral scholars and mass comm students formulated theses.",
@@ -593,7 +593,7 @@ export const campusMemories = [
     hindiTitle: "ई-लाइब्रेरी एवं डिजिटल रिसर्च सेक्शन",
     category: "Library",
     categoryHi: "केंद्रीय ग्रंथालय",
-    year: "Digital Section",
+    year: "2024",
     image: "/memories/library-03.jpeg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/12/Nalanda-Central-Library-07.jpeg",
     description: "Connected to INFLIBNET, Delnet, and international media repositories for high-speed online scholastic exploration.",
@@ -605,109 +605,71 @@ export const campusMemories = [
     hindiTitle: "दुर्लभ ग्रंथ एवं जनसंचार संदर्भ खंड",
     category: "Library",
     categoryHi: "केंद्रीय ग्रंथालय",
-    year: "Heritage Collection",
+    year: "2024",
     image: "/memories/library-04.jpeg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/12/Nalanda-Central-Library-10.jpeg",
     description: "Preserving Pandit Makhanlal Chaturvedi's historical editorials, Karmaveer files, and freedom movement journalism archives.",
     descriptionHi: "पंडित माखनलाल चतुर्वेदी जी के 'कर्मवीर' के ऐतिहासिक अंकों एवं स्वतंत्रता संग्राम की पत्रकारिता का दुर्लभ संग्रह।"
   },
 
-  // 2. Broadcast Studios & TV Production
-  {
-    id: "mem-studio-1",
-    title: "Multi-Camera High Definition Broadcast TV Studio",
-    hindiTitle: "मल्टी-कैमरा हाई-डेफिनिशन टीवी स्टूडियो व पीसीआर",
-    category: "Studios",
-    categoryHi: "स्टूडियो व प्रसारण",
-    year: "Broadcast Floor",
-    image: "/memories/studio-01.jpg",
-    fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/studio-01.jpg",
-    description: "Where thousands of anchors learned teleprompter reading, camera cues, multi-cam switching, and prime-time production.",
-    descriptionHi: "जहाँ देश के शीर्ष एंकरों और निर्माताओं ने कैमरा फेसिंग, टेलीप्रॉम्प्टर वाचन एवं लाइव पीसीआर संचालन सीखा।"
-  },
-  {
-    id: "mem-studio-2",
-    title: "Professional Anchor Desk & Teleprompter Floor",
-    hindiTitle: "प्रोफेशनल न्यूज़ बुलेटिन एंकर डेस्क",
-    category: "Studios",
-    categoryHi: "स्टूडियो व प्रसारण",
-    year: "Live Newsroom",
-    image: "/memories/studio-02.jpg",
-    fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/studio-02.jpg",
-    description: "Fully acoustic-treated news desk replicating national Hindi and English satellite news channels.",
-    descriptionHi: "राष्ट्रीय समाचार चैनलों के स्तर की पूर्णतः ध्वनिरोधी एंकर डेस्क एवं पेशेवर प्रसारण लाइटिंग।"
-  },
-  {
-    id: "mem-studio-3",
-    title: "Lighting Grids & Practical Multi-Track Studio Floor",
-    hindiTitle: "स्टूडियो लाइटिंग ग्रिड एवं मल्टी-ट्रैक फ्लोर",
-    category: "Studios",
-    categoryHi: "स्टूडियो व प्रसारण",
-    year: "Production Lab",
-    image: "/memories/studio-03.jpg",
-    fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/studio-03.jpg",
-    description: "Hands-on camera rigging, three-point lighting setups, and chroma-key virtual set backgrounds.",
-    descriptionHi: "क्रोमा-की वर्चुअल बैकड्रॉप, थ्री-पॉइंट स्टूडियो लाइटिंग और कैमरा रिगिंग का व्यावहारिक प्रशिक्षण केंद्र।"
-  },
-
-  // 3. Digital Media Labs & Editing
+  // 2. Computer & Digital Labs
   {
     id: "mem-lab-1",
-    title: "Digital Newsroom & Page Layout Pagination Lab",
+    title: "Digital Newsroom & Computer Pagination Lab",
     hindiTitle: "डिजिटल न्यूज़रूम एवं कंप्यूटर पेज मेकिंग लैब",
-    category: "Media Labs",
-    categoryHi: "डिजिटल मीडिया लैब",
-    year: "Print & Web",
+    category: "Computer Labs",
+    categoryHi: "कंप्यूटर व डिजिटल लैब",
+    year: "2024",
     image: "/memories/media-lab-01.jpg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/media-lab-01.jpg",
-    description: "InDesign, QuarkXPress, and web CMS publishing lab where student laboratory newspapers are published daily.",
-    descriptionHi: "छात्र समाचार पत्रों के संपादन, पेज लेआउट डिजाइनिंग और वेब सीएमएस पब्लिशिंग की अत्याधुनिक लैब।"
+    description: "Computer publishing and layout lab equipped with InDesign, QuarkXPress, and web CMS tools where student laboratory newspapers are published daily.",
+    descriptionHi: "छात्र समाचार पत्रों के संपादन, कंप्यूटर पेज लेआउट डिजाइनिंग और वेब सीएमएस पब्लिशिंग की अत्याधुनिक लैब।"
   },
   {
     id: "mem-lab-2",
     title: "High-Performance Graphic & Web Journalism Workstations",
     hindiTitle: "ग्राफिक्स एवं मल्टीमीडिया कंप्यूटर लैब",
-    category: "Media Labs",
-    categoryHi: "डिजिटल मीडिया लैब",
-    year: "IT Wing",
+    category: "Computer Labs",
+    categoryHi: "कंप्यूटर व डिजिटल लैब",
+    year: "2024",
     image: "/memories/media-lab-02.jpg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/media-lab-02.jpg",
-    description: "Media analytics, data journalism, infographic creation, and visual storytelling suites.",
+    description: "Computer workstations for media analytics, data journalism, infographic creation, and visual storytelling suites.",
     descriptionHi: "डेटा पत्रकारिता, विजुअल स्टोरीटेलिंग एवं इंफोग्राफिक्स निर्माण हेतु विशेष कंप्यूटर वर्कस्टेशन्स।"
   },
   {
     id: "mem-video-1",
-    title: "4K Non-Linear Video Editing Suites",
-    hindiTitle: "4K नॉन-लीनियर वीडियो एडिटिंग सुइट्स",
-    category: "Media Labs",
-    categoryHi: "डिजिटल मीडिया लैब",
-    year: "Post-Production",
+    title: "4K Non-Linear Video Editing Computer Suites",
+    hindiTitle: "4K नॉन-लीनियर वीडियो एडिटिंग कंप्यूटर सुइट्स",
+    category: "Computer Labs",
+    categoryHi: "कंप्यूटर व डिजिटल लैब",
+    year: "2024",
     image: "/memories/video-editing.jpg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/video-editing-suite.jpg",
-    description: "Dedicated post-production bays equipped with Premiere Pro, DaVinci Resolve, and multi-track audio suites.",
-    descriptionHi: "वृत्तचित्र, टेलीविज़न न्यूज़ पैकेज एवं फ़िल्म संपादन हेतु अत्याधुनिक नॉन-लीनियर एडिटिंग सुइट।"
+    description: "Dedicated computer post-production bays equipped with Premiere Pro, DaVinci Resolve, and multi-track audio suites.",
+    descriptionHi: "वृत्तचित्र, टेलीविज़न न्यूज़ पैकेज एवं फ़िल्म संपादन हेतु अत्याधुनिक नॉन-लीनियर कंप्यूटर एडिटिंग सुइट।"
   },
   {
     id: "mem-it-1",
-    title: "High-Speed IT Infrastructure & Campus Network Hub",
-    hindiTitle: "हाई-स्पीड आईटी इन्फ्रास्ट्रक्चर एवं नेटवर्क हब",
-    category: "Media Labs",
-    categoryHi: "डिजिटल मीडिया लैब",
-    year: "Computing Hub",
+    title: "High-Speed IT Infrastructure & Campus Computing Hub",
+    hindiTitle: "हाई-स्पीड आईटी इन्फ्रास्ट्रक्चर एवं कंप्यूटर नेटवर्क हब",
+    category: "Computer Labs",
+    categoryHi: "कंप्यूटर व डिजिटल लैब",
+    year: "2024",
     image: "/memories/it-infrastructure.jpg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/media-lab-01.jpg",
-    description: "Gigabit optical fiber backbone supporting modern cloud computing, digital broadcasting, and research.",
-    descriptionHi: "गीगाबिट ऑप्टिकल फाइबर और आधुनिक सर्वर से जुड़ा विश्वविद्यालय का उन्नत तकनीकी केंद्र।"
+    description: "Gigabit optical fiber backbone supporting campus servers, cloud computing, digital broadcasting, and research.",
+    descriptionHi: "गीगाबिट ऑप्टिकल फाइबर और आधुनिक सर्वर से जुड़ा विश्वविद्यालय का उन्नत कंप्यूटर व तकनीकी केंद्र।"
   },
 
-  // 4. Auditorium & Academic Conclaves
+  // 3. Auditorium & Halls
   {
     id: "mem-aud-1",
     title: "University Central Auditorium & Conclave Stage",
     hindiTitle: "विश्वविद्यालय मुख्य सभागार एवं संगोष्ठी मंच",
     category: "Auditorium",
     categoryHi: "सभागार व परिसर",
-    year: "Auditorium",
+    year: "2024",
     image: "/memories/auditorium-01.jpg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/Auditotium-Rewa-Campus-01.jpg",
     description: "Host to national media conclaves, convocation ceremonies, and national literary debates.",
@@ -715,14 +677,14 @@ export const campusMemories = [
   },
   {
     id: "mem-aud-2",
-    title: "National Conclave Hall & Media Delegate Seating",
+    title: "National Conclave Hall & Auditorium Seating",
     hindiTitle: "भव्य सभागार दर्शक दीर्घा एवं ध्वनिक व्यवस्था",
     category: "Auditorium",
     categoryHi: "सभागार व परिसर",
-    year: "Conclave Wing",
+    year: "2024",
     image: "/memories/auditorium-02.jpg",
     fallbackUrl: "https://www.mcu.ac.in/wp-content/uploads/2024/05/Auditotium-Rewa-Campus-02.jpg",
-    description: "Acoustically tuned hall welcoming dignitaries, media stalwarts, and alumni leaders from across India.",
+    description: "Acoustically tuned central auditorium welcoming dignitaries, media stalwarts, and alumni leaders from across India.",
     descriptionHi: "देश भर के पत्रकारों, कुलपतियों व विद्यार्थियों की उपस्थिति से गुंजायमान सभागार परिसर।"
   }
 ];

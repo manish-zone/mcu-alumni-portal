@@ -50,10 +50,46 @@ export const CampusGallery = ({
       'mem-alumni-2',
       'mem-alumni-3',
       'mem-alumni-4',
+      'mem-studio-1',
+      'mem-studio-2',
+      'mem-studio-3',
     ]);
     const seenSrc = new Set();
     return raw.filter((item) => {
       if (!item || duplicateEventIds.has(String(item.id))) return false;
+      const cat = String(item.category || '').toLowerCase();
+      const catHi = String(item.categoryHi || '').toLowerCase();
+      const title = String(item.title || '').toLowerCase();
+
+      // Explicitly reject studios, cultural spandan, and other non-target archives
+      if (
+        cat.includes('studio') ||
+        cat.includes('spandan') ||
+        cat.includes('cultural') ||
+        cat.includes('स्टूडियो') ||
+        catHi.includes('स्टूडियो')
+      ) {
+        return false;
+      }
+
+      // Check if it belongs to Library, Auditorium, or Computer / Digital Labs
+      const isLibrary = cat.includes('library') || catHi.includes('ग्रंथालय') || title.includes('library');
+      const isAuditorium = cat.includes('auditorium') || catHi.includes('सभागार') || title.includes('auditorium');
+      const isComputer =
+        cat.includes('computer') ||
+        cat.includes('media lab') ||
+        cat.includes('it') ||
+        catHi.includes('कंप्यूटर') ||
+        catHi.includes('डिजिटल') ||
+        title.includes('computer') ||
+        title.includes('pagination') ||
+        title.includes('workstation') ||
+        title.includes('editing') ||
+        title.includes('infrastructure') ||
+        title.includes('computing');
+
+      if (!isLibrary && !isAuditorium && !isComputer) return false;
+
       const key = item.videoUrl || item.image || '';
       if (!key || seenSrc.has(key)) return false;
       seenSrc.add(key);
@@ -61,48 +97,54 @@ export const CampusGallery = ({
     });
   }, [externalMemories]);
 
-  // Dynamically derive available years from memories (including Admin year-wise uploads)
+  // Dynamically derive available years from memories (strictly valid 4-digit years)
   const availableYears = useMemo(() => {
     const yearSet = new Set();
     effectiveMemories.forEach((item) => {
-      if (selectedCategory !== 'All' && item.category !== selectedCategory) return;
-      if (item.year) yearSet.add(String(item.year));
+      if (selectedCategory !== 'All') {
+        const matchesCat =
+          selectedCategory === 'Computer Labs'
+            ? item.category === 'Computer Labs' || item.category === 'Media Labs' || item.category === 'Computer'
+            : item.category === selectedCategory;
+        if (!matchesCat) return;
+      }
+      const yrStr = String(item.year || '').trim();
+      if (/^\d{4}$/.test(yrStr)) {
+        yearSet.add(yrStr);
+      }
     });
-    const sorted = Array.from(yearSet).sort((a, b) => {
-      const numA = parseInt(a, 10);
-      const numB = parseInt(b, 10);
-      if (!isNaN(numA) && !isNaN(numB)) return numB - numA;
-      if (!isNaN(numA)) return -1;
-      if (!isNaN(numB)) return 1;
-      return a.localeCompare(b);
-    });
+    const sorted = Array.from(yearSet).sort((a, b) => parseInt(b, 10) - parseInt(a, 10));
     return ['All', ...sorted];
   }, [effectiveMemories, selectedCategory]);
 
   const categories = useMemo(() => {
-    const base = [
+    return [
       {
         id: 'All',
         labelEn: `All Memories (${effectiveMemories.length})`,
         labelHi: `सभी स्मृतियां (${effectiveMemories.length})`,
       },
       { id: 'Library', labelEn: 'Nalanda Central Library', labelHi: 'नालंदा केंद्रीय ग्रंथालय' },
-      { id: 'Studios', labelEn: 'Broadcast Studios', labelHi: 'स्टूडियो व प्रसारण' },
-      { id: 'Media Labs', labelEn: 'Digital Media Labs', labelHi: 'डिजिटल मीडिया लैब' },
+      { id: 'Computer Labs', labelEn: 'Computer & Digital Labs', labelHi: 'कंप्यूटर व डिजिटल लैब' },
       { id: 'Auditorium', labelEn: 'Auditorium & Halls', labelHi: 'सभागार व परिसर' },
     ];
-    if (effectiveMemories.some((m) => m.category === 'Spandan Fest')) {
-      base.push({ id: 'Spandan Fest', labelEn: 'Cultural Spandan', labelHi: 'सांस्कृतिक स्पंदन' });
-    }
-    if (effectiveMemories.some((m) => m.category === 'Heritage')) {
-      base.push({ id: 'Heritage', labelEn: 'Alumni Heritage', labelHi: 'धरोहर व स्थापना' });
-    }
-    return base;
   }, [effectiveMemories]);
 
   const filteredMemories = useMemo(() => {
     return effectiveMemories.filter((item) => {
-      const matchesCat = selectedCategory === 'All' || item.category === selectedCategory;
+      let matchesCat = true;
+      if (selectedCategory !== 'All') {
+        if (selectedCategory === 'Computer Labs') {
+          matchesCat =
+            item.category === 'Computer Labs' ||
+            item.category === 'Media Labs' ||
+            item.category === 'Computer' ||
+            String(item.categoryHi || '').includes('कंप्यूटर') ||
+            String(item.categoryHi || '').includes('डिजिटल');
+        } else {
+          matchesCat = item.category === selectedCategory;
+        }
+      }
       const matchesYear = selectedYear === 'All' || String(item.year) === String(selectedYear);
       return matchesCat && matchesYear;
     });
@@ -304,8 +346,8 @@ export const CampusGallery = ({
             </h2>
             <p className="mt-1.5 text-sm sm:text-base text-slate-600 font-normal max-w-2xl mx-auto leading-relaxed">
               {lang === 'hi'
-                ? 'माखनलाल चतुर्वेदी राष्ट्रीय पत्रकारिता विश्वविद्यालय के नालंदा ग्रंथालय, टीवी स्टूडियो, मीडिया लैब एवं स्पंदन की अनमोल यादें'
-                : 'Authentic archival memories directly from official MCU website: Nalanda Central Library, TV studios, newsroom labs & Spandan fest'}
+                ? 'माखनलाल चतुर्वेदी राष्ट्रीय पत्रकारिता विश्वविद्यालय के नालंदा केंद्रीय ग्रंथालय, कंप्यूटर व डिजिटल लैब्स एवं मुख्य सभागार की अनमोल यादें'
+                : 'Authentic archival memories directly from official MCU website: Nalanda Central Library, Computer & Digital Labs, and Central Auditorium'}
             </p>
 
             {isAdmin && onOpenAdminMemories && (
@@ -349,30 +391,32 @@ export const CampusGallery = ({
             ))}
           </div>
 
-          {/* Year-wise Archive Filter Bar */}
-          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pb-3 mb-8">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100/80 text-[#003366] text-[11px] font-extrabold shrink-0">
-              <Calendar className="w-3 h-3 text-[#fc4a00]" />
-              <span>{lang === 'hi' ? 'वर्ष (Year):' : 'Year Archive:'}</span>
-            </span>
-            {availableYears.map((yr) => (
-              <button
-                key={yr}
-                type="button"
-                onClick={() => {
-                  setSelectedYear(yr);
-                  setActivePhotoIndex(null);
-                }}
-                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all shrink-0 cursor-pointer border ${
-                  selectedYear === yr
-                    ? 'bg-gradient-to-r from-[#fc4a00] to-[#8d0303] text-white border-amber-300 shadow-xs'
-                    : 'bg-white text-slate-700 hover:text-[#003366] border-sky-200/90 hover:border-sky-300'
-                }`}
-              >
-                {yr === 'All' ? (lang === 'hi' ? 'सभी वर्ष (All Years)' : 'All Years') : yr}
-              </button>
-            ))}
-          </div>
+          {/* Year-wise Archive Filter Bar (Only shown when multiple years exist) */}
+          {availableYears.length > 2 && (
+            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pb-3 mb-8">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-100/80 text-[#003366] text-[11px] font-extrabold shrink-0">
+                <Calendar className="w-3 h-3 text-[#fc4a00]" />
+                <span>{lang === 'hi' ? 'वर्ष (Year):' : 'Year Archive:'}</span>
+              </span>
+              {availableYears.map((yr) => (
+                <button
+                  key={yr}
+                  type="button"
+                  onClick={() => {
+                    setSelectedYear(yr);
+                    setActivePhotoIndex(null);
+                  }}
+                  className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all shrink-0 cursor-pointer border ${
+                    selectedYear === yr
+                      ? 'bg-gradient-to-r from-[#fc4a00] to-[#8d0303] text-white border-amber-300 shadow-xs'
+                      : 'bg-white text-slate-700 hover:text-[#003366] border-sky-200/90 hover:border-sky-300'
+                  }`}
+                >
+                  {yr === 'All' ? (lang === 'hi' ? 'सभी वर्ष (All Years)' : 'All Years') : yr}
+                </button>
+              ))}
+            </div>
+          )}
         </ScrollReveal>
 
         {/* Section 10: Campus Memories Enclosed Frame with Pagination */}
