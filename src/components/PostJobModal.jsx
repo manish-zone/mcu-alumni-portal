@@ -333,7 +333,7 @@ export const PostJobModal = ({ onClose, onJobPosted, currentUser, isVerifiedAlum
                 required
                 value={formData.postedBy}
                 onChange={(e) => setFormData({ ...formData, postedBy: e.target.value })}
-                placeholder="e.g. Amit Saxena (MCA Batch of 2018)"
+                placeholder="e.g. Manish Vishwakarma (MCA Batch of 2018)"
                 className="w-full bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#fc4a00]"
               />
             </div>

@@ -1128,7 +1128,7 @@ export const EditProfileModal = ({
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Rahul Sharma"
+                    placeholder="Manish Vishwakarma"
                     className="w-full bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-[#003366]"
                   />
                 </div>
@@ -1755,7 +1755,7 @@ export const EditProfileModal = ({
                   required
                   value={jobFormData.postedBy}
                   onChange={(e) => setJobFormData({ ...jobFormData, postedBy: e.target.value })}
-                  placeholder="e.g. Amit Sharma (MCA Batch of 2021)"
+                  placeholder="e.g. Manish Vishwakarma (MCA Batch of 2021)"
                   className="w-full bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#fc4a00]"
                 />
               </div>

@@ -318,7 +318,7 @@ export const JobApplicationModal = ({ job, currentUser = null, alumniList = [], 
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Rahul Verma"
+                placeholder="Manish Vishwakarma"
                 className="w-full bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-[#fc4a00]"
               />
             </div>

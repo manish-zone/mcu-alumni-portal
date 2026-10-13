@@ -1306,7 +1306,7 @@ export const AuthModal = ({ initialMode = 'register', alumniList = [], onClose, 
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Rahul Sharma"
+                    placeholder="Manish Vishwakarma"
                     className="w-full bg-slate-50/70 hover:bg-white focus:bg-white px-3.5 py-2 rounded-xl border border-slate-300 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#002244] focus:ring-2 focus:ring-[#002244]/10 transition-all shadow-2xs"
                   />
                 </div>

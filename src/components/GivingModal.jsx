@@ -165,7 +165,7 @@ export const GivingModal = ({ initiative, onClose, onSuccess }) => {
                 required
                 value={donorName}
                 onChange={(e) => setDonorName(e.target.value)}
-                placeholder="Your Name"
+                placeholder="Manish Vishwakarma"
                 className="w-full bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#8d0303]"
               />
             </div>

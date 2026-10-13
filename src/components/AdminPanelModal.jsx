@@ -2479,7 +2479,7 @@ export const AdminPanelModal = ({
                     <input
                       type="text"
                       required
-                      placeholder="Full Name *"
+                      placeholder="Manish Vishwakarma"
                       value={newAlumniForm.name}
                       onChange={(e) => setNewAlumniForm((p) => ({ ...p, name: e.target.value }))}
                       className="px-3.5 py-2.5 rounded-xl bg-white border border-sky-200 text-sm"

@@ -619,7 +619,7 @@ export const GoogleSignInButton = ({
                     required
                     value={userFullName}
                     onChange={(e) => setUserFullName(e.target.value)}
-                    placeholder="e.g. Meera Agrawal"
+                    placeholder="Manish Vishwakarma"
                     className="w-full bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:border-[#003366]"
                   />
                 </div>
