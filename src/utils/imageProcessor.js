@@ -75,7 +75,7 @@ export function isVideoUrlOrData(input) {
 /**
  * Process an uploaded video file (validating <= 5MB limit) into a Data URL and optional poster frame
  */
-export async function processVideoFile(file, maxBytes = MAX_MEMORY_VIDEO_BYTES) {
+export async function processVideoFile(file, maxBytes = MAX_MEMORY_VIDEO_BYTES, onProgress) {
   if (!file) {
     throw new Error('No video file provided');
   }
@@ -87,12 +87,22 @@ export async function processVideoFile(file, maxBytes = MAX_MEMORY_VIDEO_BYTES) 
     throw err;
   }
 
+  onProgress?.(15, `Reading video file (${sizeMB} MB)...`);
+
   const dataUrl = await new Promise((resolve, reject) => {
     const reader = new FileReader();
+    reader.onprogress = (e) => {
+      if (e.lengthComputable && e.total > 0 && typeof onProgress === 'function') {
+        const pct = Math.min(80, 15 + Math.round((e.loaded / e.total) * 65));
+        onProgress(pct, `Reading video (${pct}%)...`);
+      }
+    };
     reader.onload = (e) => resolve(e.target?.result || '');
     reader.onerror = () => reject(new Error('Failed to read video file'));
     reader.readAsDataURL(file);
   });
+
+  onProgress?.(85, 'Extracting video preview thumbnail...');
 
   // Attempt to capture a thumbnail poster frame & dimensions from the video (with safe 2.5s timeout)
   const meta = await new Promise((resolve) => {
@@ -169,6 +179,8 @@ export async function processVideoFile(file, maxBytes = MAX_MEMORY_VIDEO_BYTES) 
     }
   });
 
+  onProgress?.(100, 'Video ready (100%)');
+
   return {
     dataUrl,
     sizeMB,
@@ -200,9 +212,15 @@ export async function isHeicOrHeifFile(file) {
 /**
  * Convert a Blob/File to a Data URL
  */
-function blobToDataUrl(blob) {
+function blobToDataUrl(blob, onProgressSub) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
+    reader.onprogress = (e) => {
+      if (e.lengthComputable && e.total > 0 && typeof onProgressSub === 'function') {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        onProgressSub(pct);
+      }
+    };
     reader.onload = (e) => resolve(e.target?.result || '');
     reader.onerror = () => reject(new Error('Failed to read image blob'));
     reader.readAsDataURL(blob);
@@ -275,13 +293,17 @@ function renderHighQualityCanvas(img, targetWidth, targetHeight) {
  * - Automatically converts HEIC/HEIF to high-definition JPEG
  * - Only resizes if dimensions exceed maxWidth / maxHeight (preserving 100% crispness)
  * - Uses multi-step high-quality smoothing & 0.94-0.95 JPEG quality so visual quality never drops
+ * - Reports real-time percentage progress (0 - 100%) via onProgress callback
  */
 export async function processHighQualityImage(file, options = {}) {
   const {
     maxWidth = 1920,
     maxHeight = 1440,
     quality = 0.94,
+    onProgress,
   } = options;
+
+  onProgress?.(10, 'Analyzing image format...');
 
   let workingBlob = file;
   let wasHeicConverted = false;
@@ -289,14 +311,25 @@ export async function processHighQualityImage(file, options = {}) {
   const isHeic = await isHeicOrHeifFile(file);
   if (isHeic) {
     try {
+      onProgress?.(20, 'Converting HEIC to high-definition JPEG...');
       workingBlob = await convertHeicBlobToJpeg(file, 0.95);
       wasHeicConverted = true;
+      onProgress?.(45, 'HEIC conversion complete');
     } catch (heicErr) {
       console.warn('Primary HEIC conversion note, trying native decode:', heicErr);
     }
   }
 
-  let sourceDataUrl = await blobToDataUrl(workingBlob);
+  const baseReadPct = wasHeicConverted ? 45 : 15;
+  const readSpan = wasHeicConverted ? 25 : 45;
+  onProgress?.(baseReadPct, 'Reading image data...');
+
+  let sourceDataUrl = await blobToDataUrl(workingBlob, (subPct) => {
+    const mapped = Math.min(baseReadPct + readSpan, baseReadPct + Math.round((subPct / 100) * readSpan));
+    onProgress?.(mapped, `Reading file (${mapped}%)...`);
+  });
+
+  onProgress?.(65, 'Decoding image at high resolution...');
   let img;
 
   try {
@@ -304,6 +337,7 @@ export async function processHighQualityImage(file, options = {}) {
   } catch (decodeErr) {
     // Fallback: if browser couldn't decode the image natively (e.g., unflagged HEIC/HEIF), convert via heic2any
     if (!wasHeicConverted) {
+      onProgress?.(70, 'Running HEIC fallback converter...');
       const convertedBlob = await convertHeicBlobToJpeg(file, 0.95);
       wasHeicConverted = true;
       sourceDataUrl = await blobToDataUrl(convertedBlob);
@@ -334,6 +368,7 @@ export async function processHighQualityImage(file, options = {}) {
   // If image didn't need resizing, wasn't HEIC, and original file is already compact (<= 1.2 MB),
   // preserve exact untouched original Data URL for 100% zero-loss fidelity!
   if (!wasResized && !wasHeicConverted && file.size <= 1200 * 1024) {
+    onProgress?.(100, 'Original HD quality ready (100%)');
     return {
       dataUrl: sourceDataUrl,
       width: originalWidth,
@@ -345,8 +380,10 @@ export async function processHighQualityImage(file, options = {}) {
     };
   }
 
+  onProgress?.(80, 'Optimizing HD canvas dimensions...');
   const canvas = renderHighQualityCanvas(img, targetWidth, targetHeight);
 
+  onProgress?.(92, 'Finalizing HD compression & clarity...');
   // Preserve PNG transparency if input was PNG and not huge; otherwise use high-quality 0.94 JPEG
   const isPng = (file.type || '').toLowerCase() === 'image/png' && !wasHeicConverted;
   let finalDataUrl = isPng
@@ -357,6 +394,8 @@ export async function processHighQualityImage(file, options = {}) {
   if (isPng && finalDataUrl.length > 2400000) {
     finalDataUrl = canvas.toDataURL('image/jpeg', quality);
   }
+
+  onProgress?.(100, 'HD Photo ready (100%)');
 
   return {
     dataUrl: finalDataUrl,

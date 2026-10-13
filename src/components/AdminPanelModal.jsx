@@ -59,6 +59,81 @@ const STANDARD_YEARS = [
   '2005', '2000', '1995', '1990'
 ];
 
+/**
+ * Real-time Percentage Progress Card for Admin Media Uploads
+ * Displays animated progress bar, percentage badge, and live phase descriptions
+ */
+const UploadProgressCard = ({
+  progress = 0,
+  statusText = '',
+  lang = 'en',
+  mediaType = 'image',
+  countText = '',
+}) => {
+  const clamped = Math.min(100, Math.max(0, Math.round(progress)));
+  const isComplete = clamped >= 100;
+
+  return (
+    <div className="w-full max-w-md mx-auto p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-sky-50/95 to-white border border-sky-200/90 shadow-sm flex flex-col items-center text-center">
+      {/* Top Icon & Live Percentage Badge */}
+      <div className="flex items-center justify-center gap-3.5 mb-2.5">
+        <div className="relative">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#003366] to-[#0284c7] flex items-center justify-center text-white shadow-md">
+            {isComplete ? (
+              <CheckCircle2 className="w-6 h-6 text-emerald-300" />
+            ) : mediaType === 'video' ? (
+              <Film className="w-6 h-6 animate-pulse" />
+            ) : (
+              <Upload className="w-6 h-6 animate-bounce" />
+            )}
+          </div>
+          {!isComplete && (
+            <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#fc4a00] opacity-75" />
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#fc4a00]" />
+            </span>
+          )}
+        </div>
+        <div className="text-left">
+          <div className="text-2xl sm:text-3xl font-black text-[#003366] tracking-tight leading-none flex items-baseline gap-1">
+            <span>{clamped}</span>
+            <span className="text-sm font-extrabold text-sky-600">%</span>
+          </div>
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">
+            {isComplete
+              ? (lang === 'hi' ? 'अपलोड पूर्ण • Ready' : 'Processing Complete')
+              : (lang === 'hi' ? 'अपलोड व प्रोसेसिंग चालू है...' : 'Uploading & Optimizing...')}
+          </div>
+        </div>
+      </div>
+
+      {/* Real-time Status Text */}
+      <p className="text-xs font-semibold text-slate-700 min-h-[1.25rem] mb-2 px-2 text-center line-clamp-2">
+        {statusText || (lang === 'hi' ? 'HD मीडिया प्रोसेस हो रहा है...' : 'Processing HD media...')}
+      </p>
+
+      {/* Animated Gradient Progress Bar */}
+      <div className="w-full">
+        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-sky-200/90 shadow-inner">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-[#003366] via-[#0284c7] to-[#fc4a00] transition-all duration-300 ease-out shadow-sm"
+            style={{ width: `${clamped}%` }}
+          />
+        </div>
+
+        {/* Milestone Marks */}
+        <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mt-1.5 px-0.5">
+          <span>0%</span>
+          <span className="text-sky-800 font-extrabold">
+            {countText || (isComplete ? '100% ✓' : `${clamped}%`)}
+          </span>
+          <span>100%</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const AdminPanelModal = ({
   isOpen,
   onClose,
@@ -155,6 +230,8 @@ export const AdminPanelModal = ({
     fileSizeMB: '',
   });
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [memoryUploadProgress, setMemoryUploadProgress] = useState(0);
+  const [memoryUploadStatusText, setMemoryUploadStatusText] = useState('');
   const [isDraggingMemoryPhoto, setIsDraggingMemoryPhoto] = useState(false);
   const [memoryUploadNotice, setMemoryUploadNotice] = useState(null);
 
@@ -166,6 +243,12 @@ export const AdminPanelModal = ({
   const [targetArchiveId, setTargetArchiveId] = useState('');
   const [eventYearFilter, setEventYearFilter] = useState('All');
   const [isUploadingEventPhotos, setIsUploadingEventPhotos] = useState(false);
+  const [eventUploadProgress, setEventUploadProgress] = useState(0);
+  const [eventUploadStatusText, setEventUploadStatusText] = useState('');
+  const [eventUploadCountText, setEventUploadCountText] = useState('');
+  const [isUploadingSlidePhoto, setIsUploadingSlidePhoto] = useState(false);
+  const [slideUploadProgress, setSlideUploadProgress] = useState(0);
+  const [slideUploadStatusText, setSlideUploadStatusText] = useState('');
   const [eventUploadNotice, setEventUploadNotice] = useState(null);
 
   // Queued photos for new event album or existing event album
@@ -472,6 +555,12 @@ export const AdminPanelModal = ({
       }
 
       setIsUploadingImage(true);
+      setMemoryUploadProgress(15);
+      setMemoryUploadStatusText(
+        lang === 'hi'
+          ? `वीडियो (${sizeMB} MB / 5 MB) लोड हो रहा है... (15%)`
+          : `Reading video (${sizeMB} MB / 5 MB max)... (15%)`
+      );
       setMemoryUploadNotice({
         type: 'ready',
         message:
@@ -481,7 +570,14 @@ export const AdminPanelModal = ({
       });
 
       try {
-        const processedVid = await processVideoFile(file, MAX_MEMORY_VIDEO_BYTES);
+        const processedVid = await processVideoFile(file, MAX_MEMORY_VIDEO_BYTES, (pct, status) => {
+          setMemoryUploadProgress(pct);
+          if (status) setMemoryUploadStatusText(status);
+        });
+        setMemoryUploadProgress(100);
+        setMemoryUploadStatusText(
+          lang === 'hi' ? 'वीडियो तैयार है (100%)!' : 'Video ready (100%)!'
+        );
         setMemoryForm((prev) => ({
           ...prev,
           image: processedVid.dataUrl,
@@ -521,13 +617,23 @@ export const AdminPanelModal = ({
         setMemoryUploadNotice({ type: 'error', message: errMsg });
         if (onShowToast) onShowToast(errMsg, 'error');
       } finally {
-        setIsUploadingImage(false);
+        setTimeout(() => {
+          setIsUploadingImage(false);
+          setMemoryUploadProgress(0);
+          setMemoryUploadStatusText('');
+        }, 450);
       }
       return;
     }
 
     // Handle Image Upload (HEIC / HD Auto-Resize)
     setIsUploadingImage(true);
+    setMemoryUploadProgress(10);
+    setMemoryUploadStatusText(
+      lang === 'hi'
+        ? 'HD फ़ोटो अपलोड व प्रोसेसिंग शुरू... (10%)'
+        : 'Starting HD photo upload & processing... (10%)'
+    );
     setMemoryUploadNotice({
       type: 'ready',
       message:
@@ -541,7 +647,16 @@ export const AdminPanelModal = ({
         maxWidth: 1920,
         maxHeight: 1440,
         quality: 0.95,
+        onProgress: (pct, status) => {
+          setMemoryUploadProgress(pct);
+          if (status) setMemoryUploadStatusText(status);
+        },
       });
+
+      setMemoryUploadProgress(100);
+      setMemoryUploadStatusText(
+        lang === 'hi' ? 'HD फ़ोटो तैयार है (100%)!' : 'HD Photo ready (100%)!'
+      );
 
       setMemoryForm((prev) => ({
         ...prev,
@@ -597,7 +712,11 @@ export const AdminPanelModal = ({
       setMemoryUploadNotice({ type: 'error', message: errMsg });
       if (onShowToast) onShowToast(errMsg, 'error');
     } finally {
-      setIsUploadingImage(false);
+      setTimeout(() => {
+        setIsUploadingImage(false);
+        setMemoryUploadProgress(0);
+        setMemoryUploadStatusText('');
+      }, 450);
     }
   };
 
@@ -744,6 +863,13 @@ export const AdminPanelModal = ({
     if (files.length === 0) return;
 
     setIsUploadingEventPhotos(true);
+    setEventUploadProgress(5);
+    setEventUploadCountText(`0 / ${files.length}`);
+    setEventUploadStatusText(
+      lang === 'hi'
+        ? `${files.length} फ़ोटो अपलोड शुरू... (5%)`
+        : `Starting upload of ${files.length} photo(s)... (5%)`
+    );
     setEventUploadNotice({
       type: 'ready',
       message:
@@ -753,14 +879,36 @@ export const AdminPanelModal = ({
     });
 
     const addedItems = [];
-    for (let i = 0; i < files.length; i += 1) {
+    const totalFiles = files.length;
+    for (let i = 0; i < totalFiles; i += 1) {
       const f = files[i];
       if (!isSupportedImageFile(f)) continue;
+
+      const basePct = Math.round((i / totalFiles) * 100);
+      const chunkSpan = 100 / totalFiles;
+      setEventUploadCountText(
+        lang === 'hi'
+          ? `फ़ोटो ${i + 1} / ${totalFiles}`
+          : `Photo ${i + 1} of ${totalFiles}`
+      );
+
       try {
         const processed = await processHighQualityImage(f, {
           maxWidth: 1920,
           maxHeight: 1440,
           quality: 0.94,
+          onProgress: (subPct, status) => {
+            const currentOverall = Math.min(
+              99,
+              Math.round(basePct + (subPct / 100) * chunkSpan)
+            );
+            setEventUploadProgress(currentOverall);
+            setEventUploadStatusText(
+              lang === 'hi'
+                ? `फ़ोटो ${i + 1}/${totalFiles}: ${status || 'प्रोसेसिंग...'} (${currentOverall}%)`
+                : `Photo ${i + 1}/${totalFiles}: ${status || 'processing...'} (${currentOverall}%)`
+            );
+          },
         });
         const cleanFileName = (f.name || `Event Photo ${i + 1}`).replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ');
         addedItems.push({
@@ -775,7 +923,25 @@ export const AdminPanelModal = ({
       }
     }
 
-    setIsUploadingEventPhotos(false);
+    setEventUploadProgress(100);
+    setEventUploadCountText(
+      lang === 'hi'
+        ? `${addedItems.length} / ${totalFiles} तैयार`
+        : `${addedItems.length} of ${totalFiles} ready`
+    );
+    setEventUploadStatusText(
+      lang === 'hi'
+        ? `सभी ${addedItems.length} HD फ़ोटो तैयार हैं (100%)!`
+        : `All ${addedItems.length} HD photo(s) ready (100%)!`
+    );
+
+    setTimeout(() => {
+      setIsUploadingEventPhotos(false);
+      setEventUploadProgress(0);
+      setEventUploadStatusText('');
+      setEventUploadCountText('');
+    }, 500);
+
     if (addedItems.length > 0) {
       setEventPhotoQueue((prev) => [...prev, ...addedItems]);
       setEventUploadNotice({
@@ -1007,13 +1173,27 @@ export const AdminPanelModal = ({
       if (onShowToast) onShowToast('Please select a valid image file (HEIC, JPG, PNG, WEBP).', 'error');
       return;
     }
-    setIsUploadingEventPhotos(true);
+    setIsUploadingSlidePhoto(true);
+    setSlideUploadProgress(10);
+    setSlideUploadStatusText(
+      lang === 'hi'
+        ? 'HD स्लाइड फ़ोटो अपलोड शुरू... (10%)'
+        : 'Starting HD slide photo upload... (10%)'
+    );
     try {
       const processed = await processHighQualityImage(file, {
         maxWidth: 1920,
         maxHeight: 1440,
         quality: 0.94,
+        onProgress: (pct, status) => {
+          setSlideUploadProgress(pct);
+          if (status) setSlideUploadStatusText(status);
+        },
       });
+      setSlideUploadProgress(100);
+      setSlideUploadStatusText(
+        lang === 'hi' ? 'स्लाइड फ़ोटो तैयार है (100%)!' : 'Slide photo ready (100%)!'
+      );
       setSlideForm((p) => ({ ...p, image: processed.dataUrl }));
       setEventUploadNotice({
         type: 'ready',
@@ -1025,7 +1205,11 @@ export const AdminPanelModal = ({
     } catch {
       if (onShowToast) onShowToast('Could not process slide photo.', 'error');
     } finally {
-      setIsUploadingEventPhotos(false);
+      setTimeout(() => {
+        setIsUploadingSlidePhoto(false);
+        setSlideUploadProgress(0);
+        setSlideUploadStatusText('');
+      }, 450);
       if (e.target) e.target.value = '';
     }
   };
@@ -2861,43 +3045,51 @@ export const AdminPanelModal = ({
                           className="hidden"
                         />
 
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => eventPhotosInputRef.current?.click()}
-                          onDragOver={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                          onDrop={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (e.dataTransfer?.files?.length) {
-                              handleEventFilesSelected(e.dataTransfer.files);
-                            }
-                          }}
-                          className="flex flex-col items-center justify-center min-h-[168px] p-4 rounded-2xl border-2 border-dashed border-sky-300 hover:border-[#fc4a00] bg-white cursor-pointer transition-all group text-center"
-                        >
-                          <Upload className="w-8 h-8 text-sky-600 group-hover:text-[#fc4a00] mb-2 transition-colors" />
-                          <div className="text-sm font-extrabold text-[#003366]">
-                            {isUploadingEventPhotos
-                              ? lang === 'hi'
-                                ? '⏳ फ़ोटो HD में प्रोसेस हो रही हैं...'
-                                : '⏳ Processing HD Photo(s)...'
-                              : lang === 'hi'
-                              ? 'डिवाइस से 1 या एक साथ कई फ़ोटो चुनें (Click or Drop)'
-                              : 'Click or Drop 1 or Multiple Event Photos'}
+                        {isUploadingEventPhotos ? (
+                          <div className="flex flex-col items-center justify-center min-h-[168px] p-4 rounded-2xl border-2 border-sky-300 bg-sky-50/70 text-center w-full">
+                            <UploadProgressCard
+                              progress={eventUploadProgress}
+                              statusText={eventUploadStatusText}
+                              countText={eventUploadCountText}
+                              lang={lang}
+                              mediaType="multiple"
+                            />
                           </div>
-                          <div className="text-xs text-slate-500 mt-1 mb-2.5">
-                            Supports Multiple Photos • HEIC, JPG, PNG, WEBP (Full HD Auto-Resize)
-                          </div>
-                          <span className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#003366] to-[#0284c7] group-hover:from-[#fc4a00] group-hover:to-[#8d0303] text-white text-xs font-extrabold inline-flex items-center gap-1.5">
-                            <PlusCircle className="w-3.5 h-3.5" />
-                            <span>
-                              {lang === 'hi' ? 'फ़ोटो चुनें (Browse Files)' : 'Select Photo(s) from Device'}
+                        ) : (
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => eventPhotosInputRef.current?.click()}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (e.dataTransfer?.files?.length) {
+                                handleEventFilesSelected(e.dataTransfer.files);
+                              }
+                            }}
+                            className="flex flex-col items-center justify-center min-h-[168px] p-4 rounded-2xl border-2 border-dashed border-sky-300 hover:border-[#fc4a00] bg-white cursor-pointer transition-all group text-center"
+                          >
+                            <Upload className="w-8 h-8 text-sky-600 group-hover:text-[#fc4a00] mb-2 transition-colors" />
+                            <div className="text-sm font-extrabold text-[#003366]">
+                              {lang === 'hi'
+                                ? 'डिवाइस से 1 या एक साथ कई फ़ोटो चुनें (Click or Drop)'
+                                : 'Click or Drop 1 or Multiple Event Photos'}
+                            </div>
+                            <div className="text-xs text-slate-500 mt-1 mb-2.5">
+                              Supports Multiple Photos • HEIC, JPG, PNG, WEBP (Full HD Auto-Resize)
+                            </div>
+                            <span className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#003366] to-[#0284c7] group-hover:from-[#fc4a00] group-hover:to-[#8d0303] text-white text-xs font-extrabold inline-flex items-center gap-1.5">
+                              <PlusCircle className="w-3.5 h-3.5" />
+                              <span>
+                                {lang === 'hi' ? 'फ़ोटो चुनें (Browse Files)' : 'Select Photo(s) from Device'}
+                              </span>
                             </span>
-                          </span>
-                        </div>
+                          </div>
+                        )}
 
                         {/* Direct Image URL Adder */}
                         <div className="flex items-center gap-2">
@@ -3478,10 +3670,25 @@ export const AdminPanelModal = ({
                           className="hidden"
                         />
                         <div
-                          onClick={() => slidePhotoInputRef.current?.click()}
-                          className="flex flex-col items-center justify-center h-44 rounded-2xl border-2 border-dashed border-sky-300 hover:border-[#fc4a00] bg-white cursor-pointer overflow-hidden relative"
+                          onClick={() => {
+                            if (!isUploadingSlidePhoto) slidePhotoInputRef.current?.click();
+                          }}
+                          className={`flex flex-col items-center justify-center h-44 rounded-2xl border-2 border-dashed overflow-hidden relative ${
+                            isUploadingSlidePhoto
+                              ? 'border-sky-400 bg-sky-50/70 p-3'
+                              : 'border-sky-300 hover:border-[#fc4a00] bg-white cursor-pointer'
+                          }`}
                         >
-                          {slideForm.image ? (
+                          {isUploadingSlidePhoto ? (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <UploadProgressCard
+                                progress={slideUploadProgress}
+                                statusText={slideUploadStatusText}
+                                lang={lang}
+                                mediaType="image"
+                              />
+                            </div>
+                          ) : slideForm.image ? (
                             <img
                               src={slideForm.image}
                               alt="Slide Preview"
@@ -3555,7 +3762,8 @@ export const AdminPanelModal = ({
                         <div className="flex justify-end pt-1">
                           <button
                             type="submit"
-                            className="px-5 py-2.5 rounded-xl btn-mcu-saffron text-white text-sm font-extrabold flex items-center gap-2 shadow-md cursor-pointer"
+                            disabled={isUploadingSlidePhoto}
+                            className="px-5 py-2.5 rounded-xl btn-mcu-saffron text-white text-sm font-extrabold flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-60"
                           >
                             <Upload className="w-4 h-4" />
                             <span>
@@ -3696,9 +3904,13 @@ export const AdminPanelModal = ({
                     <div
                       role="button"
                       tabIndex={0}
-                      onClick={() => memoryFileInputRef.current?.click()}
+                      onClick={() => {
+                        if (!isUploadingImage && !memoryForm.image) {
+                          memoryFileInputRef.current?.click();
+                        }
+                      }}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
+                        if ((e.key === 'Enter' || e.key === ' ') && !isUploadingImage && !memoryForm.image) {
                           e.preventDefault();
                           memoryFileInputRef.current?.click();
                         }
@@ -3714,15 +3926,26 @@ export const AdminPanelModal = ({
                         setIsDraggingMemoryPhoto(false);
                       }}
                       onDrop={handleMemoryDrop}
-                      className={`relative flex flex-col items-center justify-center h-56 rounded-2xl border-2 border-dashed overflow-hidden cursor-pointer transition-all group ${
+                      className={`relative flex flex-col items-center justify-center min-h-[224px] rounded-2xl border-2 border-dashed overflow-hidden transition-all group ${
                         isDraggingMemoryPhoto
                           ? 'border-[#fc4a00] bg-amber-50/70 scale-[1.01]'
+                          : isUploadingImage
+                          ? 'border-sky-400 bg-sky-50/70 p-4'
                           : memoryForm.image
                           ? 'border-emerald-400 bg-slate-950'
-                          : 'border-sky-300 hover:border-[#fc4a00] bg-white'
+                          : 'border-sky-300 hover:border-[#fc4a00] bg-white cursor-pointer'
                       }`}
                     >
-                      {memoryForm.image ? (
+                      {isUploadingImage ? (
+                        <div className="w-full p-4 flex flex-col items-center justify-center">
+                          <UploadProgressCard
+                            progress={memoryUploadProgress}
+                            statusText={memoryUploadStatusText}
+                            lang={lang}
+                            mediaType={memoryForm.mediaType || 'image'}
+                          />
+                        </div>
+                      ) : memoryForm.image ? (
                         <>
                           {memoryForm.mediaType === 'video' || isVideoUrlOrData(memoryForm.image) ? (
                             <video
@@ -3796,11 +4019,7 @@ export const AdminPanelModal = ({
                             <Film className="w-8 h-8 text-[#fc4a00]" />
                           </div>
                           <div className="text-sm font-extrabold text-[#003366]">
-                            {isUploadingImage
-                              ? lang === 'hi'
-                                ? 'फ़ोटो / वीडियो प्रोसेस हो रहा है...'
-                                : 'Processing Photo / Video...'
-                              : lang === 'hi'
+                            {lang === 'hi'
                               ? 'डिवाइस से फ़ोटो या वीडियो (5 MB तक) अपलोड करें'
                               : 'Click to Upload Photo or Video (Max 5 MB)'}
                           </div>
