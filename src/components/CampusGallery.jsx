@@ -620,21 +620,122 @@ export const CampusGallery = ({
 
       </div>
 
-      {/* Lightbox Modal with Fullscreen, Zoom Controls & Prev/Next Nav */}
+      {/* Lightbox Modal with Fullscreen, Zoom Controls & Prev/Next Nav (Exact same dimensions & style as Event Lightbox) */}
       {activePhoto &&
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-fadeIn"
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn"
             onClick={() => setActivePhotoIndex(null)}
           >
             <div
-              className="bg-slate-950/95 max-w-3xl md:max-w-[760px] w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 shadow-2xl relative flex flex-col max-h-[88vh]"
+              className="relative max-w-5xl w-full max-h-[92vh] flex flex-col bg-slate-900 rounded-2xl overflow-hidden border border-white/20 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Image / Video Header (Reduced width, perfectly fitted image) */}
+              {/* Modal Top Bar (Matching Events Modal) */}
+              <div className="flex items-center justify-between p-4 bg-slate-950 border-b border-white/10 text-white">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="px-2.5 py-0.5 rounded bg-[#fc4a00] text-xs font-bold shrink-0">
+                    {activePhoto.year}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-white text-xs font-mono font-semibold shrink-0">
+                    {activePhotoIndex + 1} / {filteredMemories.length}
+                  </span>
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-bold truncate">
+                      {lang === 'hi' ? activePhoto.hindiTitle || activePhoto.title : activePhoto.title}
+                    </h4>
+                    <span className="text-[11px] text-amber-300 truncate block">
+                      {lang === 'hi' ? activePhoto.categoryHi || activePhoto.category : activePhoto.category}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {/* Zoom Controls */}
+                  {!isVideoUrlOrData(activePhoto) && (
+                    <div className="hidden sm:flex items-center gap-1 bg-white/10 px-2 py-1 rounded-lg border border-white/10 mr-1">
+                      <button
+                        type="button"
+                        onClick={handleZoomOut}
+                        disabled={zoomScale <= 1}
+                        className="p-1 rounded hover:bg-white/20 disabled:opacity-30 transition-all cursor-pointer"
+                        title="Zoom Out (-)"
+                      >
+                        <ZoomOut className="w-3.5 h-3.5 text-white" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleZoomReset}
+                        className="px-1.5 text-[11px] font-mono font-bold text-amber-300 hover:text-white cursor-pointer"
+                        title="Reset Zoom (100%)"
+                      >
+                        {Math.round(zoomScale * 100)}%
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleZoomIn}
+                        disabled={zoomScale >= 3}
+                        className="p-1 rounded hover:bg-white/20 disabled:opacity-30 transition-all cursor-pointer"
+                        title="Zoom In (+)"
+                      >
+                        <ZoomIn className="w-3.5 h-3.5 text-white" />
+                      </button>
+                      {zoomScale > 1 && (
+                        <button
+                          type="button"
+                          onClick={handleZoomReset}
+                          className="p-1 rounded text-amber-300 hover:bg-white/20 transition-all cursor-pointer"
+                          title="Reset Zoom (1x)"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {isAdmin && onDeleteMemory && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const targetId = activePhoto.id;
+                        setActivePhotoIndex(null);
+                        onDeleteMemory(targetId);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow"
+                      title="Admin: Delete this Memory"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{lang === 'hi' ? 'फ़ोटो हटाएं' : 'Delete Photo'}</span>
+                    </button>
+                  )}
+
+                  {activePhoto.fallbackUrl && (
+                    <a
+                      href={activePhoto.fallbackUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs transition-colors"
+                      title="View Original on mcu.ac.in"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+
+                  <button
+                    onClick={() => setActivePhotoIndex(null)}
+                    className="p-2 rounded-lg bg-white/10 hover:bg-red-600 text-white transition-colors cursor-pointer"
+                    title="Close (Esc)"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Image Body with Prev / Next Buttons (Exact same size as Event Lightbox: max-h-[70vh]) */}
               <div
-                className="relative w-full h-[42vh] sm:h-[48vh] md:h-[52vh] bg-slate-950 flex items-center justify-center overflow-hidden select-none p-2 sm:p-3"
+                className="flex-1 min-h-0 bg-black flex items-center justify-center p-2 relative overflow-hidden select-none"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -651,7 +752,7 @@ export const CampusGallery = ({
                     controls
                     autoPlay
                     playsInline
-                    className="w-full h-full object-contain bg-black rounded-lg"
+                    className="max-w-full max-h-[70vh] object-contain rounded-lg bg-black"
                   />
                 ) : (
                   <div
@@ -672,161 +773,44 @@ export const CampusGallery = ({
                         transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                         cursor: zoomScale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
                       }}
-                      className="max-w-full max-h-full w-auto h-auto object-contain select-none rounded-lg drop-shadow-md"
+                      className="max-w-full max-h-[70vh] object-contain rounded-lg select-none"
                     />
                   </div>
                 )}
 
-                {/* Prev / Next Buttons */}
+                {/* Previous Photo Button */}
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setActivePhotoIndex((prev) => (prev - 1 + filteredMemories.length) % filteredMemories.length);
                   }}
-                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-slate-900/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
-                  title="Previous (Left Arrow)"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-900/80 text-white hover:bg-[#fc4a00] border border-white/15 transition-colors shadow-lg cursor-pointer"
+                  title="Previous photo (Left Arrow)"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
 
+                {/* Next Photo Button */}
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setActivePhotoIndex((prev) => (prev + 1) % filteredMemories.length);
                   }}
-                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-slate-900/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
-                  title="Next (Right Arrow)"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-900/80 text-white hover:bg-[#fc4a00] border border-white/15 transition-colors shadow-lg cursor-pointer"
+                  title="Next photo (Right Arrow)"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
-
-                {/* Floating Zoom Controls Bar (Over Image) */}
-                {!isVideoUrlOrData(activePhoto) && (
-                  <div
-                    className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 sm:gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-slate-950/85 hover:bg-slate-950 text-white backdrop-blur-md border border-white/20 shadow-xl transition-all"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      type="button"
-                      onClick={handleZoomOut}
-                      disabled={zoomScale <= 1}
-                      className="p-1 sm:p-1.5 rounded-full hover:bg-white/20 active:scale-90 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
-                      title="Zoom Out (-) / ज़ूम घटाएं"
-                      aria-label="Zoom Out"
-                    >
-                      <ZoomOut className="w-4 h-4 text-white" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleZoomReset}
-                      className="px-2 py-0.5 rounded-full text-[11px] sm:text-xs font-mono font-bold hover:bg-white/20 active:scale-95 transition-all text-amber-300 cursor-pointer"
-                      title="Reset Zoom (100%) / सामान्य आकार"
-                    >
-                      {Math.round(zoomScale * 100)}%
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleZoomIn}
-                      disabled={zoomScale >= 3}
-                      className="p-1 sm:p-1.5 rounded-full hover:bg-white/20 active:scale-90 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
-                      title="Zoom In (+) / ज़ूम बढ़ाएं"
-                      aria-label="Zoom In"
-                    >
-                      <ZoomIn className="w-4 h-4 text-white" />
-                    </button>
-
-                    {zoomScale > 1 && (
-                      <button
-                        type="button"
-                        onClick={handleZoomReset}
-                        className="p-1 sm:p-1.5 rounded-full hover:bg-white/20 active:scale-90 text-amber-300 transition-all cursor-pointer border-l border-white/20 pl-1.5 sm:pl-2 ml-0.5"
-                        title="Reset Zoom (1x)"
-                        aria-label="Reset Zoom"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* Top Right Close & Admin Delete */}
-                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex items-center gap-1.5 sm:gap-2">
-                  {isAdmin && onDeleteMemory && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const targetId = activePhoto.id;
-                        setActivePhotoIndex(null);
-                        onDeleteMemory(targetId);
-                      }}
-                      className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-rose-600/95 hover:bg-rose-700 text-white text-xs font-extrabold inline-flex items-center gap-1 shadow-lg cursor-pointer"
-                      title="Delete from Memories (Admin)"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Delete</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setActivePhotoIndex(null)}
-                    className="p-1.5 sm:p-2 rounded-full bg-slate-950/80 text-white hover:bg-[#fc4a00] transition-colors shadow-lg cursor-pointer"
-                    title="Close (Esc)"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Counter Indicator */}
-                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 px-3 py-1 rounded-full bg-black/75 text-white text-xs font-semibold backdrop-blur-sm flex items-center gap-1.5 shadow-md border border-white/10">
-                  <span>
-                    {activePhotoIndex + 1} / {filteredMemories.length}
-                  </span>
-                  {isVideoUrlOrData(activePhoto) && (
-                    <span className="px-1.5 py-0.5 rounded bg-rose-600 text-[10px] font-black uppercase">
-                      🎬 VIDEO
-                    </span>
-                  )}
-                </div>
               </div>
 
-              {/* Modal Body Info (Properly Padded Docked Area so Image Remains Fully Visible) */}
-              <div
-                className="px-5 py-3.5 sm:px-6 sm:py-4 bg-slate-950/90 backdrop-blur-md border-t border-white/10 text-white flex flex-col gap-1.5 flex-shrink-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#003366] text-white border border-sky-400/30 shadow-xs">
-                      {lang === 'hi' ? activePhoto.categoryHi : activePhoto.category}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-[#fc4a00]/20 text-[#fc4a00] border border-[#fc4a00]/40">
-                      {activePhoto.year}
-                    </span>
-                  </div>
-
-                  {activePhoto.fallbackUrl && (
-                    <a
-                      href={activePhoto.fallbackUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold text-slate-200 border border-white/15 transition-colors"
-                    >
-                      <span>mcu.ac.in पर मूल छायाचित्र</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-[#fc4a00]" />
-                    </a>
-                  )}
+              {/* Modal Footer Caption (Exact same as Event Lightbox) */}
+              {(activePhoto.description || activePhoto.descriptionHi) && (
+                <div className="p-3 sm:p-4 bg-slate-950 border-t border-white/10 text-xs text-slate-300 text-center">
+                  <p>{lang === 'hi' ? activePhoto.descriptionHi || activePhoto.description : activePhoto.description}</p>
                 </div>
-
-                <h3 className="text-base sm:text-lg font-bold text-white font-editorial tracking-wide">
-                  {lang === 'hi' ? activePhoto.hindiTitle : activePhoto.title}
-                </h3>
-
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
-                  {lang === 'hi' ? activePhoto.descriptionHi : activePhoto.description}
-                </p>
-              </div>
+              )}
             </div>
           </div>,
           document.body
