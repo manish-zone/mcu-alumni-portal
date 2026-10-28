@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 export const Footer = () => {
-  const { lang, t } = useLanguage();
+  const { lang, t, portalContent } = useLanguage();
 
   const scrollTo = (id) => {
     const element = document.getElementById(id);
@@ -52,8 +52,8 @@ export const Footer = () => {
 
             <p className="text-xs text-slate-300 leading-relaxed max-w-md font-normal">
               {lang === 'hi'
-                ? 'एशिया का प्रथम पत्रकारिता एवं संचार विश्वविद्यालय (स्थापना 1990)। 38,000 से अधिक पूर्व छात्र देश एवं दुनिया के प्रमुख मीडिया, प्रसारण, जनसंपर्क एवं तकनीकी संस्थानों में सेवारत हैं।'
-                : "Asia's first national university dedicated to journalism and mass communication (estd. 1990). Connecting 38,000+ alumni across leading national and international media houses, broadcasting networks, and creative institutions."}
+                ? (portalContent?.footerDescHi || `एशिया का प्रथम पत्रकारिता एवं संचार विश्वविद्यालय (स्थापना 1990)। ${portalContent?.alumniCount || '38,000+'} से अधिक पूर्व छात्र देश एवं दुनिया के प्रमुख मीडिया, प्रसारण, जनसंपर्क एवं तकनीकी संस्थानों में सेवारत हैं।`)
+                : (portalContent?.footerDescEn || `Asia's first national university dedicated to journalism and mass communication (estd. 1990). Connecting ${portalContent?.alumniCount || '38,000+'} alumni across leading national and international media houses, broadcasting networks, and creative institutions.`)}
             </p>
 
             <div className="inline-flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-[11px] text-amber-200">

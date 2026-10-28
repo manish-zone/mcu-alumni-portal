@@ -41,7 +41,7 @@ export const AlumniDirectory = ({
   onRequestMentorship,
   profiles: externalProfiles = null,
 }) => {
-  const { lang, t } = useLanguage();
+  const { lang, t, portalContent } = useLanguage();
   const [selectedDept, setSelectedDept] = useState('all');
   const [selectedCampus, setSelectedCampus] = useState('all');
   const [selectedBatch, setSelectedBatch] = useState('all');
@@ -421,7 +421,7 @@ export const AlumniDirectory = ({
               <p className="text-xs text-slate-500 max-w-md mx-auto mb-4 leading-relaxed font-normal">
                 {lang === 'hi'
                   ? `खोज "${searchQuery || selectedBatch}" स्थानीय पोर्टल डेटाबेस में पंजीकृत नहीं है। आप सीधे लिंक्डइन पर खोज सकते हैं:`
-                  : `"${searchQuery || selectedBatch}" is not yet registered in the local portal. Search live across 38,000+ MCU pass-outs on LinkedIn:`}
+                  : `"${searchQuery || selectedBatch}" is not yet registered in the local portal. Search live across ${portalContent?.alumniCount || '38,000+'} MCU pass-outs on LinkedIn:`}
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-3">

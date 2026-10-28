@@ -30,7 +30,7 @@ export function CommandPalette({
   onOpenAuth,
   onSearchDirectory,
 }) {
-  const { lang, toggleLanguage } = useLanguage();
+  const { lang, toggleLanguage, portalContent } = useLanguage();
   const [query, setQuery] = useState('');
   const [activeScope, setActiveScope] = useState('all'); // 'all' | 'alumni' | 'jobs' | 'actions'
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -166,7 +166,7 @@ export function CommandPalette({
           type: 'action',
           category: lang === 'hi' ? 'त्वरित पोर्टल कमांड्स' : 'Quick Navigation & Actions',
           title: lang === 'hi' ? 'पूर्व छात्र निर्देशिका (Alumni Directory) खोलें' : 'Explore Alumni Directory',
-          subtitle: lang === 'hi' ? 'बैच, कंपनी और शहर के अनुसार खोजें' : 'Filter 38,000+ alumni by batch, company, skill & city',
+          subtitle: lang === 'hi' ? 'बैच, कंपनी और शहर के अनुसार खोजें' : `Filter ${portalContent?.alumniCount || '38,000+'} alumni by batch, company, skill & city`,
           badge: 'Directory',
           badgeColor: 'bg-slate-100 text-slate-700 border-slate-200',
           ctaLabel: lang === 'hi' ? 'खोलें' : 'Jump',
@@ -388,8 +388,8 @@ export function CommandPalette({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={
               lang === 'hi'
-                ? 'पूर्व छात्र, कंपनी (Google, NDTV), जॉब्स या सेक्शन खोजें...'
-                : 'Search alumni, companies (Google, NDTV), jobs, or jump to section...'
+                ? 'पूर्व छात्र, कंपनी (Google, Microsoft), जॉब्स या सेक्शन खोजें...'
+                : 'Search alumni, companies (Google, Microsoft), jobs, or jump to section...'
             }
             className="w-full bg-transparent text-sm sm:text-[15px] text-slate-900 placeholder-slate-400 font-semibold focus:outline-none"
           />
@@ -473,7 +473,7 @@ export function CommandPalette({
               <p className="text-xs text-slate-500 mb-3">
                 {lang === 'hi'
                   ? 'पूर्ण पूर्व छात्र निर्देशिका में नाम, बैच या शहर से खोजें'
-                  : 'Try searching across the complete 38,000+ alumni directory'}
+                  : `Try searching across the complete ${portalContent?.alumniCount || '38,000+'} alumni directory`}
               </p>
               <button
                 onClick={() => {

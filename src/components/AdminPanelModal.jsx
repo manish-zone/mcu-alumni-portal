@@ -33,7 +33,8 @@ import {
   KeyRound,
   Mail,
   Filter,
-  Film
+  Film,
+  RotateCcw
 } from 'lucide-react';
 import { verifyLinkedInNameMatch } from '../utils/linkedin';
 import { isCurrentStudent } from '../utils/skills';
@@ -174,7 +175,7 @@ export const AdminPanelModal = ({
   onDeleteApplication,
   onShowToast,
 }) => {
-  const { lang } = useLanguage();
+  const { lang, portalContent, updatePortalContent, resetPortalContent } = useLanguage();
   const [activeTab, setActiveTab] = useState(initialTab || 'overview');
 
   // Filters & Search
@@ -308,6 +309,45 @@ export const AdminPanelModal = ({
       'गौरवपूर्ण उपलब्धि: एमसीयू कंप्यूटर विज्ञान के पूर्व छात्रों का गूगल, माइक्रोसॉफ्ट एवं शीर्ष वैश्विक संस्थानों में चयन!',
     achievementBadge: broadcastNotice?.achievementBadge || 'ALUMNI ACHIEVEMENT',
   }));
+
+  // Portal Texts & Stats (38,000+ Alumni Count, Directory Subtitle, Hero Descriptions, Footer)
+  const [contentDraft, setContentDraft] = useState(() => ({
+    alumniCount: portalContent?.alumniCount || '38,000+',
+    directoryTitleEn: portalContent?.directoryTitleEn || 'Global Alumni Directory',
+    directoryTitleHi: portalContent?.directoryTitleHi || 'वैश्विक पूर्व छात्र निर्देशिका',
+    directorySubtitleEn:
+      portalContent?.directorySubtitleEn ||
+      'Search and connect with over 38,000 media and tech professionals worldwide.',
+    directorySubtitleHi:
+      portalContent?.directorySubtitleHi ||
+      'विश्वभर में कार्यरत 38,000+ पूर्व छात्रों से सीधे जुड़ें और संपर्क सूत्र स्थापित करें।',
+    heroNetworkTickerEn:
+      portalContent?.heroNetworkTickerEn ||
+      '🟢 Live Network: 38,000+ Verified Alumni across Global Media & Tech Enterprises',
+    heroNetworkTickerHi:
+      portalContent?.heroNetworkTickerHi ||
+      '🟢 लाइव नेटवर्क: 38,000+ सत्यापित पूर्व छात्र विश्वभर के मीडिया एवं IT संस्थानों में',
+    heroDescriptionEn:
+      portalContent?.heroDescriptionEn ||
+      'Makhanlal Chaturvedi National University of Journalism and Communication brings together 38,000+ editors, broadcasters, filmmakers, PR leaders, and media-tech pioneers shaping public discourse across the globe.',
+    heroDescriptionHi:
+      portalContent?.heroDescriptionHi ||
+      'माखनलाल चतुर्वेदी राष्ट्रीय पत्रकारिता एवं संचार विश्वविद्यालय के 38,000+ से अधिक संपादक, टीवी एंकर, फिल्म निर्माता, जनसंपर्क निदेशक व मीडिया-टेक विशेषज्ञ वैश्विक फलक पर राष्ट्र का गौरव बढ़ा रहे हैं।',
+    footerDescEn:
+      portalContent?.footerDescEn ||
+      "Asia's first national university dedicated to journalism and mass communication (estd. 1990). Connecting 38,000+ alumni across leading national and international media houses, broadcasting networks, and creative institutions.",
+    footerDescHi:
+      portalContent?.footerDescHi ||
+      'एशिया का प्रथम पत्रकारिता एवं संचार विश्वविद्यालय (स्थापना 1990)। 38,000 से अधिक पूर्व छात्र देश एवं दुनिया के प्रमुख मीडिया, प्रसारण, जनसंपर्क एवं तकनीकी संस्थानों में सेवारत हैं।',
+  }));
+
+  useEffect(() => {
+    if (portalContent) {
+      setContentDraft((prev) => ({ ...prev, ...portalContent }));
+    }
+  }, [portalContent]);
+
+  const [contentPreviewLang, setContentPreviewLang] = useState('en');
 
   // Admin Login Security (Change Email & Password) State
   const [showCurrentPass, setShowCurrentPass] = useState(false);
@@ -1545,6 +1585,39 @@ export const AdminPanelModal = ({
     }
   };
 
+  // Live Portal Content & Stats Handlers
+  const handleSavePortalContent = (e) => {
+    if (e) e.preventDefault();
+    if (updatePortalContent) {
+      updatePortalContent(contentDraft);
+    }
+    try {
+      confetti({ particleCount: 80, spread: 65, origin: { y: 0.6 } });
+    } catch {}
+    if (onShowToast) {
+      onShowToast(
+        lang === 'hi'
+          ? 'पोर्टल टेक्स्ट, डायरेक्टरी सबटाइटल एवं पूर्व छात्र आंकड़े सफलतापूर्वक लाइव अपडेट हो गए!'
+          : 'Portal texts, Directory Subtitle & Alumni stats updated live!',
+        'success'
+      );
+    }
+  };
+
+  const handleResetPortalContent = () => {
+    if (resetPortalContent) {
+      resetPortalContent();
+    }
+    if (onShowToast) {
+      onShowToast(
+        lang === 'hi'
+          ? 'डिफ़ॉल्ट यूनिवर्सिटी टेक्स्ट और 38,000+ आंकड़े बहाल कर दिए गए हैं!'
+          : 'Default MCU portal texts & 38,000+ stats restored!',
+        'info'
+      );
+    }
+  };
+
   if (!isOpen) return null;
 
   const totalPendingActions = pendingAlumniList.length + pendingJobsList.length;
@@ -1642,9 +1715,9 @@ export const AdminPanelModal = ({
           </div>
         </div>
 
-        {/* ── FULL-WIDTH 6-COLUMN NAVIGATION TABS BAR (COMPACT ON MOBILE, NO CLIPPING) ── */}
+        {/* ── FULL-WIDTH 7-COLUMN NAVIGATION TABS BAR (COMPACT ON MOBILE, NO CLIPPING) ── */}
         <div className="bg-gradient-to-b from-[#eaf4ff] to-white px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 border-b border-sky-200/90 shrink-0 shadow-2xs">
-          <div className="max-w-[1600px] mx-auto w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 sm:gap-2">
+          <div className="max-w-[1600px] mx-auto w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-1.5 sm:gap-2">
             {[
               {
                 id: 'overview',
@@ -1654,6 +1727,15 @@ export const AdminPanelModal = ({
                 shortHi: 'सारांश',
                 Icon: ShieldCheck,
                 badge: totalPendingActions > 0 ? totalPendingActions : null,
+              },
+              {
+                id: 'content',
+                labelEn: 'Portal Texts & Stats',
+                shortEn: 'Portal Texts',
+                labelHi: 'पोर्टल टेक्स्ट व संख्या',
+                shortHi: 'टेक्स्ट व संख्या',
+                Icon: Sparkles,
+                badge: contentDraft.alumniCount || '38k+',
               },
               {
                 id: 'jobs',
@@ -1805,6 +1887,41 @@ export const AdminPanelModal = ({
                     Active Referral Pipeline
                   </div>
                 </div>
+              </div>
+
+              {/* Quick CMS Banner: Portal Texts, Directory Subtitle & 38,000+ Alumni Count */}
+              <div className="rounded-2xl bg-gradient-to-r from-amber-500/10 via-sky-500/10 to-blue-500/10 border-2 border-amber-300/80 p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#fc4a00] to-amber-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-[#fc4a00]">
+                        PORTAL TEXTS & STATS CMS
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-black">
+                        Active: {contentDraft.alumniCount}
+                      </span>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-extrabold text-[#003366] mt-0.5">
+                      {lang === 'hi'
+                        ? 'पूर्व छात्र निर्देशिका सबटाइटल, 38,000+ संख्या व पोर्टल टेक्स्ट बदलें'
+                        : 'Edit Global Alumni Directory Subtitle, 38,000+ Count & Portal Texts'}
+                    </h3>
+                    <p className="text-xs text-slate-600 mt-0.5 max-w-2xl line-clamp-1">
+                      "{contentDraft.directorySubtitleEn || 'Search and connect with over 38,000 media and tech professionals worldwide.'}"
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('content')}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#003366] to-[#0284c7] hover:from-[#002244] hover:to-[#0369a1] text-white text-xs sm:text-sm font-extrabold flex items-center gap-2 shadow-xs cursor-pointer shrink-0 transition-all"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>{lang === 'hi' ? 'टेक्स्ट CMS खोलें' : 'Open Text CMS'}</span>
+                </button>
               </div>
 
               {/* Priority Pending Verification Queue */}
@@ -4388,6 +4505,415 @@ export const AdminPanelModal = ({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ===============================================================
+              TAB 7: LIVE PORTAL CONTENT & 38,000+ STATS CMS CONTROL
+             =============================================================== */}
+          {activeTab === 'content' && (
+            <div className="space-y-6">
+              {/* Header Card */}
+              <div className="rounded-2xl bg-white border-2 border-sky-200/90 p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#fc4a00] via-[#ea580c] to-[#003366] text-white flex items-center justify-center shadow-md shrink-0">
+                    <Sparkles className="w-6 h-6 text-amber-200" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-xs font-black uppercase tracking-wider">
+                        PORTAL CMS STUDIO
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">
+                        Real-time Synchronized
+                      </span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-[#003366] mt-1">
+                      {lang === 'hi'
+                        ? 'पोर्टल टेक्स्ट, डायरेक्टरी सबटाइटल एवं आंकड़े नियंत्रण'
+                        : 'Portal Texts, Directory Subtitle & Alumni Stats CMS'}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+                      {lang === 'hi'
+                        ? 'यहाँ से आप "Search and connect with over 38,000..." टेक्स्ट, पूर्व छात्रों की कुल संख्या, हीरो सेक्शन और फुटर के टेक्स्ट को बिना किसी कोड बदलाव के सीधे लाइव बदल सकते हैं।'
+                        : 'Customize the "Search and connect with over 38,000..." text, total alumni metrics, hero section descriptions, live network ticker, and footer text in real-time.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleResetPortalContent}
+                    className="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-colors border border-slate-200"
+                    title="Reset to default official university texts"
+                  >
+                    <RotateCcw className="w-4 h-4 text-slate-500" />
+                    <span>{lang === 'hi' ? 'डिफ़ॉल्ट बहाल करें' : 'Restore Defaults'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSavePortalContent}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#fc4a00] to-[#e04000] hover:from-[#e04000] hover:to-[#c23600] text-white text-xs sm:text-sm font-black flex items-center gap-2 shadow-md hover:shadow-lg cursor-pointer transition-all transform hover:-translate-y-0.5"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-amber-200" />
+                    <span>{lang === 'hi' ? 'लाइव प्रकाशित करें' : 'Save & Publish Live'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Real-time Interactive Visual Preview (Exact replica of user's screenshot) */}
+              <div className="rounded-2xl bg-gradient-to-b from-sky-50/70 via-white to-sky-50/40 border-2 border-sky-300/80 p-5 sm:p-6 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-200 pb-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-black uppercase tracking-wider text-[#003366]">
+                      LIVE PUBLIC DIRECTORY PREVIEW (वेबसाइट पर कैसा दिखेगा)
+                    </span>
+                  </div>
+                  <div className="inline-flex rounded-xl bg-white border border-sky-200 p-0.5 shadow-xs">
+                    <button
+                      type="button"
+                      onClick={() => setContentPreviewLang('en')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        contentPreviewLang === 'en'
+                          ? 'bg-[#003366] text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      English Preview
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setContentPreviewLang('hi')}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        contentPreviewLang === 'hi'
+                          ? 'bg-[#003366] text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      हिंदी पूर्वावलोकन
+                    </button>
+                  </div>
+                </div>
+
+                {/* Simulated Directory Header Box matching user's image */}
+                <div className="bg-white rounded-xl border border-sky-100 p-6 sm:p-8 text-center max-w-3xl mx-auto shadow-inner relative overflow-hidden">
+                  <div className="absolute top-2 right-2 text-[10px] font-black px-2 py-0.5 rounded bg-sky-100 text-sky-800 uppercase">
+                    Live UI Preview
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#003366] tracking-tight">
+                    {contentPreviewLang === 'hi'
+                      ? contentDraft.directoryTitleHi || 'वैश्विक पूर्व छात्र निर्देशिका'
+                      : contentDraft.directoryTitleEn || 'Global Alumni Directory'}
+                  </h2>
+                  <p className="mt-2.5 text-sm sm:text-base md:text-lg text-slate-600 font-medium max-w-2xl mx-auto">
+                    {contentPreviewLang === 'hi'
+                      ? contentDraft.directorySubtitleHi || 'विश्व भर में फैले 38,000+ मीडिया एवं तकनीकी पेशेवरों से जुड़ें व खोजें।'
+                      : contentDraft.directorySubtitleEn || 'Search and connect with over 38,000 media and tech professionals worldwide.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* CMS Input Form Grid */}
+              <form onSubmit={handleSavePortalContent} className="space-y-6">
+                {/* 1. Global Alumni Directory Titles & Subtitles (User's specific text) */}
+                <div className="rounded-2xl bg-white border border-sky-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-sky-100 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-sky-100 text-[#003366] flex items-center justify-center font-bold">
+                        1
+                      </div>
+                      <div>
+                        <h4 className="text-base font-extrabold text-[#003366]">
+                          Global Alumni Directory Title & Subtitle (यहीं से बदलें)
+                        </h4>
+                        <p className="text-xs text-slate-500">
+                          Control the main heading and the 38,000+ professionals subtitle shown on the Directory section.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Quick Preset Buttons for Subtitle */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[11px] font-bold text-slate-400">Quick Numbers:</span>
+                      {['38,000+', '45,000+', '50,000+'].map((count) => (
+                        <button
+                          key={count}
+                          type="button"
+                          onClick={() => {
+                            setContentDraft((prev) => ({
+                              ...prev,
+                              alumniCount: count,
+                              directorySubtitleEn: `Search and connect with over ${count} media and tech professionals worldwide.`,
+                              directorySubtitleHi: `विश्व भर में फैले ${count} मीडिया एवं तकनीकी पेशेवरों से जुड़ें व खोजें।`,
+                              heroNetworkTickerEn: `${count} Global MCU Alumni Active Worldwide`,
+                              heroNetworkTickerHi: `${count} माखनलाल पूर्व छात्र देश-विदेश में सक्रिय`,
+                            }));
+                          }}
+                          className="px-2 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold border border-sky-200 cursor-pointer transition-colors"
+                        >
+                          Use {count}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        Directory Title (English)
+                      </label>
+                      <input
+                        type="text"
+                        value={contentDraft.directoryTitleEn}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, directoryTitleEn: e.target.value }))
+                        }
+                        placeholder="Global Alumni Directory"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        डायरेक्टरी शीर्षक (Hindi)
+                      </label>
+                      <input
+                        type="text"
+                        value={contentDraft.directoryTitleHi}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, directoryTitleHi: e.target.value }))
+                        }
+                        placeholder="वैश्विक पूर्व छात्र निर्देशिका"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        Directory Subtitle (English) — <span className="text-[#fc4a00] font-bold">This is the exact text you wanted to change!</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={contentDraft.directorySubtitleEn}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, directorySubtitleEn: e.target.value }))
+                        }
+                        placeholder="Search and connect with over 38,000 media and tech professionals worldwide."
+                        className="w-full px-3.5 py-2.5 rounded-xl border-2 border-amber-300 text-sm font-medium text-slate-900 bg-amber-50/20 focus:outline-none focus:border-[#fc4a00]"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        डायरेक्टरी उपशीर्षक (Hindi Subtitle)
+                      </label>
+                      <input
+                        type="text"
+                        value={contentDraft.directorySubtitleHi}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, directorySubtitleHi: e.target.value }))
+                        }
+                        placeholder="विश्व भर में फैले 38,000+ मीडिया एवं तकनीकी पेशेवरों से जुड़ें व खोजें।"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Total Alumni Count & Hero Live Network Ticker */}
+                <div className="rounded-2xl bg-white border border-sky-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2.5 border-b border-sky-100 pb-3">
+                    <div className="w-8 h-8 rounded-lg bg-sky-100 text-[#003366] flex items-center justify-center font-bold">
+                      2
+                    </div>
+                    <div>
+                      <h4 className="text-base font-extrabold text-[#003366]">
+                        Global Alumni Count & Hero Live Network Ticker
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Updates global statistics displayed in badges, command palette search, and hero section.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        Global Alumni Count Display
+                      </label>
+                      <input
+                        type="text"
+                        value={contentDraft.alumniCount}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, alumniCount: e.target.value }))
+                        }
+                        placeholder="38,000+"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm font-bold text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                      <span className="text-[11px] text-slate-400 mt-1 block">e.g. 38,000+ or 50,000+</span>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        Hero Network Ticker (English)
+                      </label>
+                      <input
+                        type="text"
+                        value={contentDraft.heroNetworkTickerEn}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, heroNetworkTickerEn: e.target.value }))
+                        }
+                        placeholder="38,000+ Global MCU Alumni Active Worldwide"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        हीरो नेटवर्क टिकर (Hindi)
+                      </label>
+                      <input
+                        type="text"
+                        value={contentDraft.heroNetworkTickerHi}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, heroNetworkTickerHi: e.target.value }))
+                        }
+                        placeholder="38,000+ माखनलाल पूर्व छात्र देश-विदेश में सक्रिय"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Hero Section Description */}
+                <div className="rounded-2xl bg-white border border-sky-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2.5 border-b border-sky-100 pb-3">
+                    <div className="w-8 h-8 rounded-lg bg-sky-100 text-[#003366] flex items-center justify-center font-bold">
+                      3
+                    </div>
+                    <div>
+                      <h4 className="text-base font-extrabold text-[#003366]">
+                        Hero Section Description (वेबसाइट का मुख्य विवरण)
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Appears right below the main heading on the homepage banner.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        Hero Description (English)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={contentDraft.heroDescriptionEn}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, heroDescriptionEn: e.target.value }))
+                        }
+                        placeholder="Connecting over 38,000+ media leaders..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        हीरो मुख्य विवरण (Hindi)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={contentDraft.heroDescriptionHi}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, heroDescriptionHi: e.target.value }))
+                        }
+                        placeholder="एशिया के प्रथम पत्रकारिता एवं संचार विश्वविद्यालय के 38,000+ मीडिया दिग्गजों..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. University Footer Overview */}
+                <div className="rounded-2xl bg-white border border-sky-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2.5 border-b border-sky-100 pb-3">
+                    <div className="w-8 h-8 rounded-lg bg-sky-100 text-[#003366] flex items-center justify-center font-bold">
+                      4
+                    </div>
+                    <div>
+                      <h4 className="text-base font-extrabold text-[#003366]">
+                        University Footer Overview & Legacy
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Displayed at the bottom of every page under the university emblem.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        Footer Description (English)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={contentDraft.footerDescEn}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, footerDescEn: e.target.value }))
+                        }
+                        placeholder="Asia's first university dedicated to journalism..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs sm:text-sm font-bold text-[#003366] mb-1.5">
+                        फुटर विश्वविद्यालय विवरण (Hindi)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={contentDraft.footerDescHi}
+                        onChange={(e) =>
+                          setContentDraft((p) => ({ ...p, footerDescHi: e.target.value }))
+                        }
+                        placeholder="एशिया का प्रथम पत्रकारिता एवं संचार विश्वविद्यालय..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-sky-200 text-sm text-slate-800 focus:outline-none focus:border-sky-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Action Bar */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#002855] via-[#003366] to-[#0284c7] text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+                  <div>
+                    <div className="text-sm sm:text-base font-extrabold flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-300" />
+                      <span>Ready to apply changes to the website?</span>
+                    </div>
+                    <div className="text-xs text-sky-200 mt-0.5">
+                      Changes update the live Directory subtitle and portal data immediately.
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={handleResetPortalContent}
+                      className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-bold cursor-pointer transition-colors"
+                    >
+                      Reset Defaults
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#fc4a00] to-[#e04000] hover:from-[#e04000] hover:to-[#c23600] text-white text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-lg cursor-pointer transition-all"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-amber-200" />
+                      <span>Save & Publish Live</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
           )}
           </div>

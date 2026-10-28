@@ -7,7 +7,7 @@ export const universityInfo = {
   mainCampus: "Bishankhedi, Bhopal, Madhya Pradesh",
   campuses: ["Bhopal (Main Campus)", "Khandwa", "Rewa", "Datia"],
   stats: [
-    { id: "alumni", value: "38,500+", label: "Global Alumni", hindiLabel: "वैश्विक पूर्व छात्र" },
+    { id: "alumni", value: "5000+", label: "Global Alumni", hindiLabel: "वैश्विक पूर्व छात्र" },
     { id: "media", value: "650+", label: "Media & Tech Partners", hindiLabel: "मीडिया व टेक संस्थान" },
     { id: "batches", value: "34+", label: "Glorious Batches", hindiLabel: "गौरवशाली बैच" },
     { id: "countries", value: "28+", label: "Countries Represented", hindiLabel: "देशों में सक्रिय" }

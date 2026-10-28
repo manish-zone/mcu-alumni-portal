@@ -157,7 +157,7 @@ function StatCounterCard({ stat, icon, lang }) {
    HERO SECTION (Executive Pearl-White & Royal Heritage Theme)
    ───────────────────────────────────────────────────────────── */
 export const HeroSection = ({ onOpenAuth, onSearchQueryChange, searchQuery, onOpenCommandPalette, broadcastNotice = null }) => {
-  const { lang, t } = useLanguage();
+  const { lang, t, portalContent } = useLanguage();
   const [pulseIndex, setPulseIndex] = useState(0);
 
   const customBroadcastText = broadcastNotice?.enabled
@@ -172,15 +172,20 @@ export const HeroSection = ({ onOpenAuth, onSearchQueryChange, searchQuery, onOp
       : broadcastNotice.achievementTextEn || broadcastNotice.achievementTextHi
     : '';
 
+  const liveNetworkTicker =
+    lang === 'hi'
+      ? (portalContent?.heroNetworkTickerHi || `🟢 लाइव नेटवर्क: ${portalContent?.alumniCount || '38,000+'} सत्यापित पूर्व छात्र विश्वभर के मीडिया एवं IT संस्थानों में`)
+      : (portalContent?.heroNetworkTickerEn || `🟢 Live Network: ${portalContent?.alumniCount || '38,000+'} Verified Alumni across Global Media & Tech Enterprises`);
+
   const basePulses =
     lang === 'hi'
       ? [
-          '🟢 लाइव नेटवर्क: 38,000+ सत्यापित पूर्व छात्र विश्वभर के मीडिया एवं IT संस्थानों में',
+          liveNetworkTicker,
           '⚡ मेंटरशिप हब: 140+ सीनियर इंजीनियर्स एवं संपादक 1-on-1 मार्गदर्शन हेतु उपलब्ध',
           '✨ अभ्युदय 2026: वार्षिक राष्ट्रीय मीडिया एवं तकनीकी महाकुंभ पंजीकरण प्रारंभ',
         ]
       : [
-          '🟢 Live Network: 38,000+ Verified Alumni across Global Media & Tech Enterprises',
+          liveNetworkTicker,
           '⚡ Mentorship Hub: 140+ Senior Engineers & Editors active for 1-on-1 Guidance',
           '✨ Abhyuday 2026: National Media & Tech Conclave Delegate RSVP Now Open',
         ];
