@@ -74,3 +74,4 @@ class LanguageProvider extends ChangeNotifier {
   String get findMentor => isHindi ? 'मेंटर खोजें' : 'Find a Mentor';
   String get browseJobs => isHindi ? 'रोजगार अवसर' : 'Browse Jobs';
 }
+

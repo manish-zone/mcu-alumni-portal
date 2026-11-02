@@ -141,3 +141,4 @@ class _MCULiveMarqueeState extends State<MCULiveMarquee>
     );
   }
 }
+

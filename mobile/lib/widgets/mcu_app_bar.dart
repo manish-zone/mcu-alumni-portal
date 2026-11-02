@@ -262,3 +262,4 @@ class MCUAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 }
+
