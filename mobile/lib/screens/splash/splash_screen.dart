@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../main_navigation_screen.dart';
@@ -13,6 +14,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -32,22 +34,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    _navigateNext();
-  }
-
-  Future<void> _navigateNext() async {
-    await Future.delayed(const Duration(milliseconds: 2000));
-    if (!mounted) return;
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => const MainNavigationScreen(),
-      ),
-    );
+    _timer = Timer(const Duration(milliseconds: 2200), () {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const MainNavigationScreen(),
+        ),
+      );
+    });
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -58,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
-          gradient: AppColors.heroGradient,
+          gradient: AppColors.royalNavyGradient,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -69,28 +68,32 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: Container(
-                  width: 100,
-                  height: 100,
+                  width: 110,
+                  height: 110,
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 20,
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 24,
                         offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                  child: const Center(
-                    child: Text(
-                      'MCU',
-                      style: TextStyle(
-                        fontFamily: 'serif',
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.primaryNavy,
-                        letterSpacing: 2,
+                  child: Image.asset(
+                    'assets/images/mcu-logo.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Center(
+                      child: Text(
+                        'MCU',
+                        style: TextStyle(
+                          fontFamily: 'serif',
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primaryNavy,
+                        ),
                       ),
                     ),
                   ),
@@ -107,8 +110,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.6,
+                      fontFamily: 'serif',
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -116,17 +120,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     'National University of Journalism & Communication',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.88),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                     decoration: BoxDecoration(
-                      color: AppColors.accentSaffron,
+                      gradient: AppColors.saffronBadgeGradient,
                       borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.royalCrimson.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: const Text(
                       'GLOBAL ALUMNI PORTAL',
@@ -143,7 +154,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ),
             const Spacer(),
             Padding(
-              padding: const EdgeInsets.only(bottom: 30),
+              padding: const EdgeInsets.only(bottom: 34),
               child: Column(
                 children: [
                   SizedBox(
@@ -152,7 +163,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white.withOpacity(0.8),
+                        AppColors.goldAccent.withValues(alpha: 0.9),
                       ),
                     ),
                   ),
@@ -160,9 +171,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Text(
                     '35 Years of Media Excellence • Est. 1990',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.65),
                       fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

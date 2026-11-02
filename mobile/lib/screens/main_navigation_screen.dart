@@ -47,13 +47,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border(
-            top: BorderSide(color: AppColors.cardBorder, width: 1),
+          border: const Border(
+            top: BorderSide(color: AppColors.glassBorder, width: 1.2),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
+              color: AppColors.skyAccent.withValues(alpha: 0.12),
+              blurRadius: 16,
               offset: const Offset(0, -4),
             ),
           ],
@@ -64,30 +64,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             onDestinationSelected: _onItemTapped,
             backgroundColor: Colors.white,
             elevation: 0,
+            indicatorColor: AppColors.primaryNavy.withValues(alpha: 0.1),
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home, color: AppColors.primaryNavy),
+                selectedIcon: Icon(Icons.home, color: AppColors.royalNavyDark),
                 label: 'Home',
               ),
               NavigationDestination(
-                icon: Icon(Icons.people_outline),
-                selectedIcon: Icon(Icons.people, color: AppColors.primaryNavy),
+                icon: Icon(Icons.groups_outlined),
+                selectedIcon: Icon(Icons.groups, color: AppColors.royalNavyDark),
                 label: 'Directory',
               ),
               NavigationDestination(
                 icon: Icon(Icons.work_outline),
-                selectedIcon: Icon(Icons.work, color: AppColors.primaryNavy),
-                label: 'Jobs',
+                selectedIcon: Icon(Icons.work, color: AppColors.royalNavyDark),
+                label: 'Jobs Hub',
               ),
               NavigationDestination(
                 icon: Icon(Icons.event_outlined),
-                selectedIcon: Icon(Icons.event, color: AppColors.primaryNavy),
-                label: 'Events',
+                selectedIcon: Icon(Icons.event, color: AppColors.royalNavyDark),
+                label: 'Abhyuday',
               ),
               NavigationDestination(
                 icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person, color: AppColors.primaryNavy),
+                selectedIcon: Icon(Icons.person, color: AppColors.royalNavyDark),
                 label: 'Profile',
               ),
             ],

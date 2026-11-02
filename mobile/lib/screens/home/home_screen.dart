@@ -1,96 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/language_provider.dart';
 import '../../providers/alumni_provider.dart';
 import '../../providers/jobs_provider.dart';
 import '../../providers/events_provider.dart';
+import '../../widgets/mcu_app_bar.dart';
+import '../../widgets/mcu_animated_crest.dart';
+import '../../widgets/mcu_live_marquee.dart';
+import '../../widgets/stat_counter_card.dart';
 import '../directory/alumni_directory_screen.dart';
+import '../directory/alumni_detail_screen.dart';
 import '../jobs/jobs_screen.dart';
 import '../events/events_screen.dart';
-import '../auth/login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
+    final langProvider = context.watch<LanguageProvider>();
     final alumniProvider = context.watch<AlumniProvider>();
     final eventsProvider = context.watch<EventsProvider>();
+    final isHindi = langProvider.isHindi;
 
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.primaryNavy,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: Text(
-                  'MCU',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'MCU Alumni Portal',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primaryNavy,
-                  ),
-                ),
-                Text(
-                  'माखनलाल चतुर्वेदी विश्वविद्यालय, भोपाल',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          if (!authProvider.isAuthenticated)
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: TextButton.icon(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  );
-                },
-                icon: const Icon(Icons.login, size: 16, color: AppColors.accentSaffron),
-                label: const Text(
-                  'Sign In',
-                  style: TextStyle(
-                    color: AppColors.accentSaffron,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
+      appBar: const MCUAppBar(),
       body: RefreshIndicator(
+        color: AppColors.accentSaffron,
+        backgroundColor: Colors.white,
         onRefresh: () async {
           await alumniProvider.fetchAlumni();
           if (!context.mounted) return;
@@ -101,27 +39,41 @@ class HomeScreen extends StatelessWidget {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 1. Hero Section Banner
-              _buildHeroBanner(context),
+              // 1. Dual Marquee Tickers (Notice & Live Network Ticker)
+              MCULiveMarquee(
+                text: isHindi
+                    ? '📢 अभ्युदय 2026: 35वां राष्ट्रीय पूर्व छात्र महाकुंभ पंजीयन प्रारंभ • सभागार, भोपाल'
+                    : '📢 Abhyuday 2026: 35th National Alumni Conclave Delegate RSVP Now Open',
+                badgeText: isHindi ? 'आधिकारिक सूचना' : 'OFFICIAL NOTICE',
+                isNotice: true,
+              ),
+              MCULiveMarquee(
+                text: langProvider.liveTicker,
+                badgeText: isHindi ? 'लाइव नेटवर्क' : 'LIVE NETWORK',
+                isNotice: false,
+              ),
 
-              // 2. Live Broadcast Ticker
-              _buildLiveTicker(),
+              // 2. Main Executive Pearl-Sky Hero Section
+              _buildHeroSection(context, langProvider, isHindi),
 
-              // 3. Quick Action Grid
-              _buildQuickActions(context),
+              // 3. Four 3D Sculpted Stat Counter Cards
+              _buildStatsGrid(langProvider, isHindi),
 
-              // 4. University Stats Grid (38,000+ Alumni)
-              _buildStatsGrid(),
+              // 4. Quick Action Feature Hub
+              _buildQuickActionGrid(context, isHindi),
 
-              // 5. Featured Upcoming Event
-              _buildFeaturedEvent(context, eventsProvider),
+              // 5. Featured Conclave Spotlight Card
+              _buildFeaturedConclave(context, eventsProvider, isHindi),
 
-              // 6. Recent Alumni Spotlight
-              _buildAlumniSpotlight(context, alumniProvider),
+              // 6. Alumni In The Spotlight
+              _buildAlumniSpotlight(context, alumniProvider, isHindi),
 
-              const SizedBox(height: 32),
+              // 7. University Emblem & Footer
+              _buildUniversityFooter(langProvider, isHindi),
+
+              const SizedBox(height: 28),
             ],
           ),
         ),
@@ -129,155 +81,297 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeroBanner(BuildContext context) {
+  Widget _buildHeroSection(
+    BuildContext context,
+    LanguageProvider langProvider,
+    bool isHindi,
+  ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
       decoration: const BoxDecoration(
-        gradient: AppColors.heroGradient,
+        gradient: AppColors.pearlBgGradient,
+        border: Border(
+          bottom: BorderSide(color: AppColors.glassBorder, width: 1),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+          // Background Tech Grid Lines
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.04,
+              child: Image.asset(
+                'assets/images/mcu-logo.png',
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 26),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Icon(Icons.stars, color: AppColors.goldAccent, size: 14),
-                const SizedBox(width: 6),
-                Text(
-                  '35 Years of Media Excellence (1990 - 2026)',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.95),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                // 3D Animated Sacred Orbital MCU Crest
+                const MCUAnimatedCrest(size: 104),
+
+                const SizedBox(height: 16),
+
+                // Royal Heritage Seal Pill
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        AppColors.royalNavyDark,
+                        AppColors.primaryNavy,
+                        AppColors.royalCrimson,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.glassBorder.withValues(alpha: 0.6)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.royalNavyDark.withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.stars, color: AppColors.goldAccent, size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        langProvider.heroBadge,
+                        style: const TextStyle(
+                          color: AppColors.goldLightBg,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                // Main Editorial Headline
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.royalNavyDark,
+                      fontFamily: 'serif',
+                      height: 1.25,
+                      letterSpacing: -0.4,
+                    ),
+                    children: [
+                      TextSpan(text: '${langProvider.heroPrefix} '),
+                      TextSpan(
+                        text: langProvider.heroHighlight,
+                        style: const TextStyle(
+                          color: AppColors.accentSaffron,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // University Description
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    langProvider.heroDescription,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary.withValues(alpha: 0.95),
+                      height: 1.45,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Dual Action Buttons (Explore Directory & Register Alumni)
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: AppColors.saffronBadgeGradient,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.accentSaffron.withValues(alpha: 0.35),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const AlumniDirectoryScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.people_alt, size: 16),
+                          label: Text(
+                            langProvider.findAlumni,
+                            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const JobsScreen()),
+                          );
+                        },
+                        icon: const Icon(Icons.work_outline, size: 16, color: AppColors.royalNavyDark),
+                        label: Text(
+                          langProvider.browseJobs,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.royalNavyDark,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: AppColors.glassBorder, width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          shadowColor: AppColors.skyAccent.withValues(alpha: 0.1),
+                          elevation: 2,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          const Text(
-            'Where Indian Media Finds Its Voice & Conscience',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Connecting over 38,000+ journalists, broadcasters, editors, and tech pioneers across the globe.',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.white.withOpacity(0.85),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const AlumniDirectoryScreen()),
-                    );
-                  },
-                  icon: const Icon(Icons.search, size: 18),
-                  label: const Text('Find Alumni'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accentSaffron,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const JobsScreen()),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white, width: 1.5),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: const Text('Browse Jobs'),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildLiveTicker() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: const Color(0xFFFEF3C7),
-      child: Row(
+  Widget _buildStatsGrid(LanguageProvider langProvider, bool isHindi) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.25,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: AppColors.accentSaffron,
-              shape: BoxShape.circle,
-            ),
+          StatCounterCard(
+            value: langProvider.alumniCount,
+            label: 'GLOBAL ALUMNI',
+            hindiLabel: 'वैश्विक पूर्व छात्र',
+            isHindi: isHindi,
+            icon: Icons.groups,
+            iconColor: AppColors.accentSaffron,
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'LIVE: 38,000+ Makhanlal alumni active worldwide across newsrooms & tech',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Colors.amber.shade900,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+          StatCounterCard(
+            value: '650+',
+            label: 'MEDIA PARTNERS',
+            hindiLabel: 'मीडिया संस्थान',
+            isHindi: isHindi,
+            icon: Icons.business,
+            iconColor: AppColors.royalCrimson,
+          ),
+          StatCounterCard(
+            value: '34+',
+            label: 'GLORIOUS BATCHES',
+            hindiLabel: 'गौरवशाली बैच',
+            isHindi: isHindi,
+            icon: Icons.school,
+            iconColor: AppColors.goldDark,
+          ),
+          StatCounterCard(
+            value: '28+',
+            label: 'COUNTRIES',
+            hindiLabel: 'देशों में सक्रिय',
+            isHindi: isHindi,
+            icon: Icons.public,
+            iconColor: AppColors.primaryNavy,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
+  Widget _buildQuickActionGrid(BuildContext context, bool isHindi) {
     final actions = [
-      {'icon': Icons.people, 'title': 'Directory', 'color': const Color(0xFF0284C7)},
-      {'icon': Icons.work, 'title': 'Jobs Hub', 'color': AppColors.accentSaffron},
-      {'icon': Icons.calendar_today, 'title': 'Conclaves', 'color': const Color(0xFF10B981)},
-      {'icon': Icons.school, 'title': 'Mentorship', 'color': const Color(0xFF8B5CF6)},
+      {
+        'title': isHindi ? 'निर्देशिका' : 'Directory',
+        'sub': isHindi ? 'पूर्व छात्र खोजें' : 'Global Search',
+        'icon': Icons.people,
+        'color': AppColors.skyAccent,
+        'route': 'directory',
+      },
+      {
+        'title': isHindi ? 'रोजगार हब' : 'Jobs Hub',
+        'sub': isHindi ? 'रेफरल अवसर' : 'Referral Portal',
+        'icon': Icons.work,
+        'color': AppColors.accentSaffron,
+        'route': 'jobs',
+      },
+      {
+        'title': isHindi ? 'महाकुंभ 2026' : 'Abhyuday 2026',
+        'sub': isHindi ? 'राष्ट्रीय सम्मेलन' : 'Conclaves & RSVP',
+        'icon': Icons.event,
+        'color': AppColors.successGreen,
+        'route': 'events',
+      },
+      {
+        'title': isHindi ? 'मार्गदर्शन' : 'Mentorship',
+        'sub': isHindi ? '1-on-1 मेंटर' : 'Industry Guides',
+        'icon': Icons.school,
+        'color': const Color(0xFF8B5CF6),
+        'route': 'directory',
+      },
     ];
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: actions.map((item) {
           final color = item['color'] as Color;
           return Expanded(
             child: GestureDetector(
               onTap: () {
-                if (item['title'] == 'Directory' || item['title'] == 'Mentorship') {
+                final route = item['route'] as String;
+                if (route == 'directory') {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const AlumniDirectoryScreen()),
                   );
-                } else if (item['title'] == 'Jobs Hub') {
+                } else if (route == 'jobs') {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const JobsScreen()),
                   );
@@ -289,36 +383,48 @@ class HomeScreen extends StatelessWidget {
               },
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.cardBorder),
+                  border: Border.all(color: AppColors.glassBorder.withValues(alpha: 0.6)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      color: AppColors.skyAccent.withValues(alpha: 0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.12),
+                        color: color.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(item['icon'] as IconData, color: color, size: 20),
+                      child: Icon(item['icon'] as IconData, color: color, size: 18),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       item['title'] as String,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.royalNavyDark,
+                      ),
+                    ),
+                    Text(
+                      item['sub'] as String,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 9,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -331,93 +437,29 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsGrid() {
-    final stats = [
-      {'val': '38,000+', 'label': 'Global Alumni', 'hindi': 'वैश्विक पूर्व छात्र'},
-      {'val': '650+', 'label': 'Media Partners', 'hindi': 'मीडिया संस्थान'},
-      {'val': '34+', 'label': 'Glorious Batches', 'hindi': 'गौरवशाली बैच'},
-      {'val': '28+', 'label': 'Countries', 'hindi': 'देशों में सक्रिय'},
-    ];
+  Widget _buildFeaturedConclave(
+    BuildContext context,
+    EventsProvider eventsProvider,
+    bool isHindi,
+  ) {
+    if (eventsProvider.events.isEmpty) return const SizedBox.shrink();
+    final ev = eventsProvider.events.first;
 
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'University Impact Metrics',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primaryNavy,
-            ),
-          ),
-          const SizedBox(height: 12),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: stats.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 2.1,
-            ),
-            itemBuilder: (context, index) {
-              final s = stats[index];
-              return Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      s['val']!,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.primaryNavy,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      s['label']!,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeaturedEvent(BuildContext context, EventsProvider eventsProvider) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Upcoming Conclave',
-                style: TextStyle(
+              Text(
+                isHindi ? 'वार्षिक महाकुंभ एवं संगोष्ठी' : 'Featured National Conclave',
+                style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primaryNavy,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.royalNavyDark,
+                  fontFamily: 'serif',
                 ),
               ),
               GestureDetector(
@@ -426,116 +468,177 @@ class HomeScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const EventsScreen()),
                   );
                 },
-                child: const Text(
-                  'View All',
-                  style: TextStyle(
+                child: Text(
+                  isHindi ? 'सभी देखें →' : 'View All →',
+                  style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.accentSaffron,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          if (eventsProvider.isLoading)
-            const Center(child: CircularProgressIndicator())
-          else if (eventsProvider.events.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
-              ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.glassBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.skyAccent.withValues(alpha: 0.1),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentSaffron.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(6),
+                  // Top Saffron Accent Bar
+                  Container(height: 3, color: AppColors.accentSaffron),
+
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                gradient: AppColors.saffronBadgeGradient,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                ev.category.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            const Icon(Icons.location_on, size: 14, color: AppColors.crimsonRed),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                ev.venue,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              ),
+                            ),
+                          ],
                         ),
-                        child: Text(
-                          eventsProvider.events.first.category,
+                        const SizedBox(height: 10),
+                        Text(
+                          isHindi && ev.hindiTitle != null ? ev.hindiTitle! : ev.title,
                           style: const TextStyle(
-                            color: AppColors.accentSaffron,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.royalNavyDark,
+                            fontFamily: 'serif',
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                      const Icon(Icons.location_on, size: 14, color: AppColors.textMuted),
-                      const SizedBox(width: 4),
-                      Text(
-                        eventsProvider.events.first.venue,
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    eventsProvider.events.first.title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primaryNavy,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    eventsProvider.events.first.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '📅 ${eventsProvider.events.first.eventDate}',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        '${eventsProvider.events.first.rsvpCount} Attending',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.info,
+                        const SizedBox(height: 6),
+                        Text(
+                          ev.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 14),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.calendar_today, size: 13, color: AppColors.primaryNavy),
+                                const SizedBox(width: 5),
+                                Text(
+                                  ev.eventDate,
+                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '${ev.rsvpCount} ${isHindi ? 'पंजीकृत' : 'Attending'}',
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.skyAccent,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: AppColors.royalNavyDark,
+                                  content: Text(
+                                    isHindi
+                                        ? 'अभ्युदय 2026 में आपकी सहभागिता की पुष्टि हो गई है!'
+                                        : 'RSVP confirmed for Abhyuday 2026!',
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.accentSaffron,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Text(
+                              isHindi ? 'महाकुंभ हेतु RSVP दर्ज करें' : 'Confirm RSVP Attendance',
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildAlumniSpotlight(BuildContext context, AlumniProvider alumniProvider) {
+  Widget _buildAlumniSpotlight(
+    BuildContext context,
+    AlumniProvider alumniProvider,
+    bool isHindi,
+  ) {
     final list = alumniProvider.allAlumni;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Alumni In The Spotlight',
-                style: TextStyle(
+              Text(
+                isHindi ? 'प्रमुख पूर्व छात्र' : 'Alumni In The Spotlight',
+                style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primaryNavy,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.royalNavyDark,
+                  fontFamily: 'serif',
                 ),
               ),
               GestureDetector(
@@ -544,11 +647,11 @@ class HomeScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const AlumniDirectoryScreen()),
                   );
                 },
-                child: const Text(
-                  'Explore Directory',
-                  style: TextStyle(
+                child: Text(
+                  isHindi ? 'निर्देशिका खोलें →' : 'Explore All →',
+                  style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.accentSaffron,
                   ),
                 ),
@@ -556,31 +659,41 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          if (alumniProvider.isLoading)
-            const Center(child: CircularProgressIndicator())
-          else
-            SizedBox(
-              height: 170,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: list.length.clamp(0, 5),
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final alum = list[index];
-                  return Container(
-                    width: 140,
+          SizedBox(
+            height: 175,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: list.length.clamp(0, 6),
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final alum = list[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => AlumniDetailScreen(alumnus: alum)),
+                    );
+                  },
+                  child: Container(
+                    width: 144,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppColors.cardBorder),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.glassBorder.withValues(alpha: 0.6)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.skyAccent.withValues(alpha: 0.06),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         CircleAvatar(
                           radius: 28,
-                          backgroundColor: AppColors.primaryNavy.withOpacity(0.1),
+                          backgroundColor: AppColors.primaryNavy.withValues(alpha: 0.1),
                           backgroundImage: alum.avatarUrl != null
                               ? NetworkImage(alum.avatarUrl!)
                               : null,
@@ -588,48 +701,108 @@ class HomeScreen extends StatelessWidget {
                               ? Text(
                                   alum.name.isNotEmpty ? alum.name[0] : 'A',
                                   style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.primaryNavy,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.royalNavyDark,
                                   ),
                                 )
                               : null,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          alum.name,
+                          isHindi && alum.hindiName != null ? alum.hindiName! : alum.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.royalNavyDark,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           alum.company,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          style: const TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.accentSaffron,
+                          ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryNavy.withOpacity(0.08),
+                            color: AppColors.royalNavyDark.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             'Batch of ${alum.batchYear}',
                             style: const TextStyle(
                               fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryNavy,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.royalNavyDark,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUniversityFooter(LanguageProvider langProvider, bool isHindi) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        color: AppColors.royalNavyDark,
+      ),
+      child: Column(
+        children: [
+          Image.asset(
+            'assets/images/mcu-logo.png',
+            height: 48,
+            errorBuilder: (_, __, ___) => const Icon(Icons.school, color: Colors.white, size: 40),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            langProvider.universityName,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              fontFamily: 'serif',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isHindi
+                ? 'एशिया का प्रथम राष्ट्रीय पत्रकारिता एवं संचार विश्वविद्यालय • स्थापना 1990'
+                : "Asia's First National Journalism & Communication University • Estd. 1990",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.75),
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Bishankhedi, Bhopal, Madhya Pradesh 462044',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 10,
+            ),
+          ),
         ],
       ),
     );
