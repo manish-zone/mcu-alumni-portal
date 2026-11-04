@@ -202,69 +202,160 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
 
-                // Dual Action Buttons (Explore Directory & Register Alumni)
+                // 3D Sculpted Action CTAs Hierarchy (Matching Website Mobile Design)
+                // 1. Primary Hero Action: Explore Alumni Directory (Full Width, Perfectly Centered)
+                Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF6A00), Color(0xFFFC4A00), Color(0xFFB91C1C)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accentSaffron.withValues(alpha: 0.38),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const AlumniDirectoryScreen()),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.people_alt_rounded, color: Colors.white, size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              isHindi ? 'पूर्व छात्र निर्देशिका देखें' : 'Explore Alumni Directory',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // 2. Dual Secondary Actions: Browse Jobs & Find a Mentor (Side-by-side, Equal Height, Perfectly Centered)
                 Row(
                   children: [
+                    // Browse Jobs (Water-Glass White Style)
                     Expanded(
                       child: Container(
+                        height: 44,
                         decoration: BoxDecoration(
-                          gradient: AppColors.saffronBadgeGradient,
-                          borderRadius: BorderRadius.circular(14),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.glassBorder, width: 1.5),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.accentSaffron.withValues(alpha: 0.35),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                              color: AppColors.skyAccent.withValues(alpha: 0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const AlumniDirectoryScreen()),
-                            );
-                          },
-                          icon: const Icon(Icons.people_alt, size: 16),
-                          label: Text(
-                            langProvider.findAlumni,
-                            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: Colors.white,
-                            shadowColor: Colors.transparent,
-                            padding: const EdgeInsets.symmetric(vertical: 13),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const JobsScreen()),
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.work_outline_rounded, size: 16, color: AppColors.royalNavyDark),
+                                const SizedBox(width: 6),
+                                Text(
+                                  isHindi ? 'रोजगार अवसर' : 'Browse Jobs',
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.royalNavyDark,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 10),
+                    // Find a Mentor (Royal Crimson Style)
                     Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const JobsScreen()),
-                          );
-                        },
-                        icon: const Icon(Icons.work_outline, size: 16, color: AppColors.royalNavyDark),
-                        label: Text(
-                          langProvider.browseJobs,
-                          style: const TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.royalNavyDark,
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF8D0303), Color(0xFF680A13)],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
                           ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFFDE68A).withValues(alpha: 0.35), width: 1.2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF680A13).withValues(alpha: 0.22),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: const BorderSide(color: AppColors.glassBorder, width: 1.5),
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          shadowColor: AppColors.skyAccent.withValues(alpha: 0.1),
-                          elevation: 2,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const AlumniDirectoryScreen()),
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.explore_rounded, size: 16, color: AppColors.goldAccent),
+                                const SizedBox(width: 6),
+                                Text(
+                                  isHindi ? 'मेंटर खोजें' : 'Find a Mentor',
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
